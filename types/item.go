@@ -1,8 +1,10 @@
 package types
 
 type Item struct {
-	price       float32
-	currency    string
-	description string
-	weigth      string
+	Price       float32
+	Currency    string
+	Description string
+	Weigth      string
+	Page        string
+	HtmlFilter  string
 }

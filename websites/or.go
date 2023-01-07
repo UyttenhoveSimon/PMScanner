@@ -1,16 +1,34 @@
 package websites
 
 import (
-	"pmscanner/types"
+	"fmt"
+	. "pmscanner/types"
 
 	"github.com/gocolly/colly/v2"
 )
 
-func collect(c *colly.Collector) []types.Item {
-	var url = "https://or.fr/"
-	var item = types.Item{}
-	var item2 = types.Item{}
-	var items = []types.Item{item, item2}
+type Or struct{}
 
-	return items
+var itemsOr = []Item{
+	{
+		Page:        "https://or.fr/produits/acheter-or/lingots-or/lingot-d-or-1-kilogramme-valcambi-60",
+		HtmlFilter:  "price text-light me-3",
+		Weigth:      "1kg",
+		Description: "ValCambi 1kg",
+	},
+}
+
+func (o Or) collect(c *colly.Collector) []Item {
+
+	var cp = c.Clone()
+	for _, element := range itemsOr {
+
+		cp.OnHTML(element.HtmlFilter, func(e *colly.HTMLElement) {
+			fmt.Printf("found: %s\n", e.Text)
+
+		})
+		cp.Visit(element.Page)
+	}
+
+	return itemsOr
 }
