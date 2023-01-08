@@ -18,7 +18,7 @@ var itemsEuropos = []Item{
 	},
 }
 
-func (e Europos) collect(c *colly.Collector) []Item {
+func (e Europos) Collect(c *colly.Collector) []Item {
 
 	var cp = c.Clone()
 	for _, element := range itemsEuropos {

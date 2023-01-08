@@ -18,13 +18,13 @@ var itemsOr = []Item{
 	},
 }
 
-func (o Or) collect(c *colly.Collector) []Item {
+func (o Or) Collect(c *colly.Collector) []Item {
 
 	var cp = c.Clone()
 	for _, element := range itemsOr {
 
 		cp.OnHTML(element.HtmlFilter, func(e *colly.HTMLElement) {
-			fmt.Printf("found: %s\n", e.Text)
+			fmt.Printf("found: %s\n", e.DOM.Text())
 
 		})
 		cp.Visit(element.Page)
