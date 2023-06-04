@@ -1,10 +1,12 @@
 package types
 
+import "github.com/shopspring/decimal"
+
 type Item struct {
-	Price       float32
+	Price       decimal.Decimal
 	Currency    string
 	Description string
-	Weigth      string
+	Weight      string
 	Page        string
 	HtmlFilter  string
 }

@@ -13,7 +13,7 @@ var itemsEuropos = []Item{
 	{
 		Page:        "https://or.fr/produits/acheter-or/lingots-or/lingot-d-or-1-kilogramme-valcambi-60",
 		HtmlFilter:  "price text-light me-3",
-		Weigth:      "1kg",
+		Weight:      "1kg",
 		Description: "ValCambi 1kg",
 	},
 }
