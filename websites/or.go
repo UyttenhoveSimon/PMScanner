@@ -25,19 +25,20 @@ var itemsOr = []Item{
 func (o Or) Collect(c *colly.Collector) []Item {
 
 	var cp = c.Clone()
-	for _, element := range itemsOr {
+	for i := range itemsOr {
 
-		cp.OnHTML(element.HtmlFilter, func(e *colly.HTMLElement) {
+		cp.OnHTML(itemsOr[i].HtmlFilter, func(e *colly.HTMLElement) {
 			priceFormat := regexp.MustCompile(`(\d+.\d+\,\d+)`)
 			price := priceFormat.FindString(e.Text)
 			fmt.Printf("found: %s\n", price)
 			twPrice := strings.ReplaceAll(price, ",", ".")
-			twPrice = strings.ReplaceAll(twPrice, " ", "")
-			fmt.Printf("tweaked Price: %s\n", twPrice)
-			element.Price, _ = decimal.NewFromString(twPrice)
-			fmt.Printf("stored price: %s\n", element.Price)
+			twPrice = strings.ReplaceAll(twPrice, "\u202f", "")
+
+			fmt.Printf("tweaked price: %s\n", twPrice)
+			itemsOr[i].Price, _ = decimal.NewFromString(twPrice)
+			fmt.Printf("stored price: %s\n", itemsOr[i].Price)
 		})
-		cp.Visit(element.Page)
+		cp.Visit(itemsOr[i].Page)
 	}
 
 	return itemsOr
