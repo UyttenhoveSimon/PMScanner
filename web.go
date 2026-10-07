@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -44,6 +45,10 @@ type server struct {
 }
 
 func runServer(addr string, refresh time.Duration) error {
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
 	s := &server{}
 	go func() {
 		for {
@@ -54,8 +59,8 @@ func runServer(addr string, refresh time.Duration) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.handlePage)
 	mux.HandleFunc("GET /api/prices", s.handleJSON)
-	log.Printf("serving on http://localhost%s (rescan every %s)", addr, refresh)
-	return http.ListenAndServe(addr, mux)
+	log.Printf("serving on http://%s (rescan every %s)", ln.Addr(), refresh)
+	return http.Serve(ln, mux)
 }
 
 func (s *server) rescan() {
