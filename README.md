@@ -86,6 +86,19 @@ it does not trigger a new scan.
 
 Running `go run .` without `-serve` also saves its scan to the database.
 
+### Static site and GitHub Pages
+
+`-export DIR` writes the web page for every saved scan as plain files
+(`index.html`, `scans/ID.html`, `api/*.json`), without scanning:
+
+```sh
+go run . -export site
+```
+
+The [Pages workflow](.github/workflows/pages.yml) does this every day on GitHub:
+it scans, keeps the database on the `data` branch, and publishes the result to
+GitHub Pages. It can also be run by hand from the Actions tab.
+
 ### Browser mode
 
 Products marked `Browser: true` need a Chromium-based browser (Chrome, Chromium,
