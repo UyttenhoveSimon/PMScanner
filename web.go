@@ -3,13 +3,17 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"html/template"
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"pmscanner/store"
 )
 
 //go:embed web.html
@@ -27,6 +31,9 @@ var categories = []string{
 
 const otherCategory = "Other"
 
+// scanListLimit caps how many past scans the page and API list.
+const scanListLimit = 500
+
 func categoryOf(description string) string {
 	for _, c := range categories {
 		if strings.HasPrefix(description, c) {
@@ -36,20 +43,19 @@ func categoryOf(description string) string {
 	return otherCategory
 }
 
-// server keeps the latest scan and refreshes it in the background.
+// server rescans in the background and serves scans from the database.
 type server struct {
+	db       *store.Store
 	mu       sync.RWMutex
-	results  []entry
-	scanned  time.Time
 	scanning bool
 }
 
-func runServer(addr string, refresh time.Duration) error {
+func runServer(addr string, refresh time.Duration, db *store.Store) error {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
-	s := &server{}
+	s := &server{db: db}
 	go func() {
 		for {
 			s.rescan()
@@ -58,23 +64,46 @@ func runServer(addr string, refresh time.Duration) error {
 	}()
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.handlePage)
-	mux.HandleFunc("GET /api/prices", s.handleJSON)
+	mux.HandleFunc("GET /api/prices", s.handlePrices)
+	mux.HandleFunc("GET /api/scans", s.handleScans)
 	log.Printf("serving on http://%s (rescan every %s)", ln.Addr(), refresh)
 	return http.Serve(ln, mux)
 }
 
 func (s *server) rescan() {
-	s.mu.Lock()
-	s.scanning = true
-	s.mu.Unlock()
+	s.setScanning(true)
+	defer s.setScanning(false)
 
 	start := time.Now()
-	results := scan()
-	log.Printf("scanned %d products in %s, %d failed", len(results), time.Since(start).Round(time.Second), failures(results))
+	entries := scan()
+	log.Printf("scanned %d products in %s, %d failed", len(entries), time.Since(start).Round(time.Second), failures(entries))
+	if _, err := s.db.Save(start, toPrices(entries)); err != nil {
+		log.Printf("save scan: %v", err)
+	}
+}
 
+func (s *server) setScanning(v bool) {
 	s.mu.Lock()
-	s.results, s.scanned, s.scanning = results, time.Now(), false
+	s.scanning = v
 	s.mu.Unlock()
+}
+
+func (s *server) isScanning() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.scanning
+}
+
+// scanID reads ?scan=ID, defaulting to the latest scan.
+func (s *server) scanID(r *http.Request) (int64, error) {
+	if v := r.URL.Query().Get("scan"); v != "" {
+		id, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return 0, store.ErrNotFound
+		}
+		return id, nil
+	}
+	return s.db.Latest()
 }
 
 type row struct {
@@ -87,22 +116,64 @@ type group struct {
 	Rows []row
 }
 
+type scanOption struct {
+	ID       int64
+	Label    string
+	Selected bool
+}
+
 type pageData struct {
 	Groups   []group
 	Failed   []row
 	Scanned  string
 	Scanning bool
+	IsLatest bool
+	Scans    []scanOption
 }
 
-func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
-	s.mu.RLock()
-	results, scanned, scanning := s.results, s.scanned, s.scanning
-	s.mu.RUnlock()
+const timeFormat = "2006-01-02 15:04"
 
-	data := pageData{Scanning: scanning}
-	if !scanned.IsZero() {
-		data.Scanned = scanned.Format("2006-01-02 15:04")
+func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
+	data := pageData{Scanning: s.isScanning()}
+
+	id, err := s.scanID(r)
+	switch {
+	case errors.Is(err, store.ErrNotFound) && r.URL.Query().Has("scan"):
+		http.Error(w, "scan not found", http.StatusNotFound)
+		return
+	case errors.Is(err, store.ErrNotFound):
+		s.render(w, data) // no scan yet
+		return
+	case err != nil:
+		s.serverError(w, err)
+		return
 	}
+
+	scanned, prices, err := s.db.Prices(id)
+	if errors.Is(err, store.ErrNotFound) {
+		http.Error(w, "scan not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		s.serverError(w, err)
+		return
+	}
+	scans, err := s.db.Scans(scanListLimit)
+	if err != nil {
+		s.serverError(w, err)
+		return
+	}
+
+	data.Scanned = scanned.Local().Format(timeFormat)
+	data.IsLatest = len(scans) > 0 && scans[0].ID == id
+	for _, sc := range scans {
+		label := sc.At.Local().Format(timeFormat)
+		if sc.Failed > 0 {
+			label += " (" + strconv.Itoa(sc.Failed) + " failed)"
+		}
+		data.Scans = append(data.Scans, scanOption{ID: sc.ID, Label: label, Selected: sc.ID == id})
+	}
+
 	byName := map[string]*group{}
 	for _, name := range append(categories, otherCategory) {
 		data.Groups = append(data.Groups, group{Name: name})
@@ -110,31 +181,48 @@ func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 	for i := range data.Groups {
 		byName[data.Groups[i].Name] = &data.Groups[i]
 	}
-	// Results are already sorted by price per gram.
-	for _, res := range results {
-		rw := row{Site: res.Site, Description: res.Description, URL: res.URL}
-		if res.Err != nil {
-			rw.Error = res.Err.Error()
+	// Prices are saved sorted by price per gram.
+	for _, p := range prices {
+		rw := row{Site: p.Site, Description: p.Description, URL: p.URL}
+		if p.Error != "" {
+			rw.Error = p.Error
 			data.Failed = append(data.Failed, rw)
 			continue
 		}
-		rw.Price, rw.PerGram, rw.Currency = res.Price.StringFixed(2), res.EURPerGram.StringFixed(2), res.Currency
-		g := byName[categoryOf(res.Description)]
+		rw.Price, rw.PerGram, rw.Currency = p.Price.StringFixed(2), p.EURPerGram.StringFixed(2), p.Currency
+		g, ok := byName[p.Category]
+		if !ok {
+			g = byName[otherCategory]
+		}
 		rw.Best = len(g.Rows) == 0
 		g.Rows = append(g.Rows, rw)
 	}
+	s.render(w, data)
+}
 
+func (s *server) render(w http.ResponseWriter, data pageData) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := page.Execute(w, data); err != nil {
 		log.Printf("render: %v", err)
 	}
 }
 
-func (s *server) handleJSON(w http.ResponseWriter, r *http.Request) {
-	s.mu.RLock()
-	results, scanned := s.results, s.scanned
-	s.mu.RUnlock()
+func (s *server) serverError(w http.ResponseWriter, err error) {
+	log.Printf("request: %v", err)
+	http.Error(w, "internal error", http.StatusInternalServerError)
+}
 
+func (s *server) handlePrices(w http.ResponseWriter, r *http.Request) {
+	id, err := s.scanID(r)
+	if err != nil {
+		s.apiError(w, err)
+		return
+	}
+	scanned, prices, err := s.db.Prices(id)
+	if err != nil {
+		s.apiError(w, err)
+		return
+	}
 	type item struct {
 		Site        string  `json:"site"`
 		Category    string  `json:"category"`
@@ -145,18 +233,49 @@ func (s *server) handleJSON(w http.ResponseWriter, r *http.Request) {
 		EURPerGram  float64 `json:"eurPerGram,omitempty"`
 		Error       string  `json:"error,omitempty"`
 	}
-	items := make([]item, 0, len(results))
-	for _, res := range results {
-		it := item{Site: res.Site, Category: categoryOf(res.Description), Description: res.Description, URL: res.URL}
-		if res.Err != nil {
-			it.Error = res.Err.Error()
-		} else {
-			it.Price, _ = res.Price.Float64()
-			it.EURPerGram, _ = res.EURPerGram.Round(4).Float64()
-			it.Currency = res.Currency
+	items := make([]item, 0, len(prices))
+	for _, p := range prices {
+		it := item{Site: p.Site, Category: p.Category, Description: p.Description, URL: p.URL, Error: p.Error}
+		if p.Error == "" {
+			it.Price, _ = p.Price.Float64()
+			it.EURPerGram, _ = p.EURPerGram.Round(4).Float64()
+			it.Currency = p.Currency
 		}
 		items = append(items, it)
 	}
+	writeJSON(w, map[string]any{"scan": id, "scanned": scanned, "prices": items})
+}
+
+func (s *server) handleScans(w http.ResponseWriter, r *http.Request) {
+	scans, err := s.db.Scans(scanListLimit)
+	if err != nil {
+		s.serverError(w, err)
+		return
+	}
+	type item struct {
+		ID     int64     `json:"id"`
+		At     time.Time `json:"at"`
+		Count  int       `json:"count"`
+		Failed int       `json:"failed"`
+	}
+	items := make([]item, 0, len(scans))
+	for _, sc := range scans {
+		items = append(items, item{sc.ID, sc.At, sc.Count, sc.Failed})
+	}
+	writeJSON(w, map[string]any{"scans": items})
+}
+
+func (s *server) apiError(w http.ResponseWriter, err error) {
+	if errors.Is(err, store.ErrNotFound) {
+		http.Error(w, "scan not found", http.StatusNotFound)
+		return
+	}
+	s.serverError(w, err)
+}
+
+func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{"scanned": scanned, "prices": items})
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		log.Printf("write json: %v", err)
+	}
 }

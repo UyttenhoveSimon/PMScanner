@@ -13,20 +13,37 @@ import (
 
 	"pmscanner/fx"
 	"pmscanner/scraper"
+	"pmscanner/store"
 )
 
 func main() {
 	serve := flag.String("serve", "", "serve a web page on this address (e.g. :8080) instead of printing a table")
 	refresh := flag.Duration("refresh", 30*time.Minute, "how often the web page rescans prices")
+	dbPath := flag.String("db", "pmscanner.db", "SQLite database where every scan is saved")
 	flag.Parse()
 
+	db, err := store.Open(*dbPath)
+	if err != nil {
+		log.Fatalf("open database: %v", err)
+	}
+	defer db.Close()
+
 	if *serve != "" {
-		log.Fatal(runServer(*serve, *refresh))
+		if err := runServer(*serve, *refresh, db); err != nil {
+			db.Close()
+			log.Fatal(err)
+		}
+		return
 	}
 
-	results := scan()
-	printTable(results)
-	if failures(results) == len(results) {
+	start := time.Now()
+	entries := scan()
+	printTable(entries)
+	if _, err := db.Save(start, toPrices(entries)); err != nil {
+		log.Printf("save scan: %v", err)
+	}
+	if failures(entries) == len(entries) {
+		db.Close()
 		os.Exit(1)
 	}
 }
@@ -67,6 +84,22 @@ func scan() []entry {
 		return a.EURPerGram.LessThan(b.EURPerGram)
 	})
 	return entries
+}
+
+// toPrices converts scan entries to database rows, keeping their order.
+func toPrices(entries []entry) []store.Price {
+	prices := make([]store.Price, len(entries))
+	for i, e := range entries {
+		p := store.Price{
+			Site: e.Site, Category: categoryOf(e.Description), Description: e.Description, URL: e.URL,
+			Price: e.Price, Currency: e.Currency, EURPerGram: e.EURPerGram,
+		}
+		if e.Err != nil {
+			p.Error = e.Err.Error()
+		}
+		prices[i] = p
+	}
+	return prices
 }
 
 func failures(entries []entry) int {
