@@ -168,7 +168,6 @@ type pageData struct {
 // buildPage gathers everything the page shows for one scan.
 func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, error) {
 	var data pageData
-	data.Rates, data.Currencies = currencyMenu(rates)
 
 	scanned, prices, err := db.Prices(id)
 	if err != nil {
@@ -232,6 +231,11 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 		}
 	}
 	slices.Sort(data.Countries)
+	var used []string
+	for _, p := range prices {
+		used = append(used, p.Currency)
+	}
+	data.Rates, data.Currencies = currencyMenu(rates, used)
 	for _, c := range data.Countries {
 		if t, ok := taxes[c]; ok {
 			data.Taxes = append(data.Taxes, taxRow{Country: c, VAT: t.VAT.String() + "%", Gold: t.Gold, Others: t.Others})
@@ -244,28 +248,30 @@ func renderPage(w io.Writer, data pageData) error {
 	return page.Execute(w, data)
 }
 
-// preferredCurrencies are listed first in the currency menu.
-var preferredCurrencies = []string{"EUR", "USD", "GBP", "CHF"}
+// extraCurrencies are offered besides the currencies the shops use.
+var extraCurrencies = []string{"EUR", "USD"}
 
-// currencyMenu returns the exchange rates for the page, as units per euro,
-// and the currency menu. Without rates, only EUR is offered.
-func currencyMenu(rates fx.Rates) (map[string]float64, []string) {
+// currencyMenu returns the currencies to offer, sorted, and their exchange
+// rates as units per euro: the shops' own currencies plus a few majors.
+// Currencies without a rate are left out.
+func currencyMenu(rates fx.Rates, used []string) (map[string]float64, []string) {
 	out := map[string]float64{"EUR": 1}
-	for cur, r := range rates {
-		out[cur], _ = r.Float64()
-	}
-	names := slices.DeleteFunc(slices.Clone(preferredCurrencies), func(c string) bool {
-		_, ok := out[c]
-		return !ok
-	})
-	var others []string
-	for cur := range out {
-		if !slices.Contains(names, cur) {
-			others = append(others, cur)
+	var names []string
+	for _, cur := range append(slices.Clone(extraCurrencies), used...) {
+		if cur == "" || slices.Contains(names, cur) {
+			continue
 		}
+		if cur != "EUR" {
+			r, ok := rates[cur]
+			if !ok {
+				continue
+			}
+			out[cur], _ = r.Float64()
+		}
+		names = append(names, cur)
 	}
-	slices.Sort(others)
-	return out, append(names, others...)
+	slices.Sort(names)
+	return out, names
 }
 
 type priceJSON struct {
