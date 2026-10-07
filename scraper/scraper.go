@@ -304,6 +304,14 @@ func currencyIn(s string) string {
 		return "GBP"
 	case strings.Contains(s, "$"), strings.Contains(s, "USD"):
 		return "USD"
+	case strings.Contains(s, "₽"), strings.Contains(s, "RUB"), strings.Contains(s, "руб"):
+		return "RUB"
+	case strings.Contains(s, "₸"), strings.Contains(s, "KZT"):
+		return "KZT"
+	case strings.Contains(s, "₼"), strings.Contains(s, "AZN"):
+		return "AZN"
+	case strings.Contains(s, "₺"), strings.Contains(s, "TRY"):
+		return "TRY"
 	}
 	return ""
 }
