@@ -23,14 +23,17 @@ type server struct {
 	ratesAt  time.Time
 	scanning bool
 	lastRun  time.Time // last scan attempt, even if it could not be saved
+
+	afterScan func()
 }
 
-func runServer(addr string, refresh time.Duration, db *store.Store) error {
+// afterScan runs after each saved scan, e.g. to write it to the history.
+func runServer(addr string, refresh time.Duration, db *store.Store, afterScan func()) error {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
-	s := &server{db: db}
+	s := &server{db: db, afterScan: afterScan}
 	if refresh > 0 {
 		go s.scanEvery(refresh)
 	}
@@ -101,7 +104,9 @@ func (s *server) rescan() {
 	log.Printf("scanned %d products in %s, %d failed", len(entries), time.Since(start).Round(time.Second), failures(entries))
 	if _, err := s.db.Save(start, toPrices(entries)); err != nil {
 		log.Printf("save scan: %v", err)
+		return
 	}
+	s.afterScan()
 }
 
 // ratesMaxAge is how long exchange rates are reused; they change once a day.

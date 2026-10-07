@@ -20,6 +20,7 @@ func main() {
 	serve := flag.String("serve", "", "serve a web page on this address (e.g. :8080) instead of printing a table")
 	refresh := flag.Duration("refresh", 24*time.Hour, "how often the web server rescans prices (0 disables automatic scans)")
 	dbPath := flag.String("db", "pmscanner.db", "SQLite database where every scan is saved")
+	historyDir := flag.String("history", "", "directory of scan files (one compressed JSON per scan): loaded into the database at start, and new scans are written to it")
 	exportDir := flag.String("export", "", "write a static copy of the web page for the saved scans to this directory, without scanning")
 	flag.Parse()
 
@@ -29,7 +30,23 @@ func main() {
 	}
 	defer db.Close()
 
+	if *historyDir != "" {
+		if err := importHistory(*historyDir, db); err != nil {
+			db.Close()
+			log.Fatalf("load history: %v", err)
+		}
+	}
+	saveHistory := func() {
+		if *historyDir == "" {
+			return
+		}
+		if err := exportHistory(*historyDir, db); err != nil {
+			log.Printf("save history: %v", err)
+		}
+	}
+
 	if *exportDir != "" {
+		saveHistory()
 		if err := exportSite(*exportDir, db); err != nil {
 			db.Close()
 			log.Fatalf("export: %v", err)
@@ -38,7 +55,7 @@ func main() {
 	}
 
 	if *serve != "" {
-		if err := runServer(*serve, *refresh, db); err != nil {
+		if err := runServer(*serve, *refresh, db, saveHistory); err != nil {
 			db.Close()
 			log.Fatal(err)
 		}
@@ -51,6 +68,7 @@ func main() {
 	if _, err := db.Save(start, toPrices(entries)); err != nil {
 		log.Printf("save scan: %v", err)
 	}
+	saveHistory()
 	if failures(entries) == len(entries) {
 		db.Close()
 		os.Exit(1)
