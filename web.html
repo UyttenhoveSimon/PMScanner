@@ -54,6 +54,10 @@
   tr:last-child td { border-bottom: 0; }
   th { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
   td.num, th.num { text-align: right; }
+  th[aria-sort] { cursor: pointer; user-select: none; }
+  th[aria-sort]:hover { color: var(--fg); }
+  th[aria-sort="ascending"]::after { content: " ▲"; }
+  th[aria-sort="descending"]::after { content: " ▼"; }
   td.desc { white-space: normal; color: var(--muted); }
   tr.best td { background: var(--best); }
   tr.best td:first-child::after { content: "cheapest"; margin-left: 8px; font-size: 11px;
@@ -119,15 +123,15 @@
       <h2>{{.Name}}</h2>
       <div class="table">
         <table>
-          <thead><tr><th>Shop</th><th>Country</th><th>Product</th><th class="num">Price</th><th class="num"><span class="cur-label">EUR</span> / gram</th></tr></thead>
+          <thead><tr><th>Shop</th><th>Country</th><th>Product</th><th class="num" data-sort-type="num">Price</th><th class="num" data-sort-type="num"><span class="cur-label">EUR</span> / gram</th></tr></thead>
           <tbody>
           {{range .Rows}}
             <tr{{if .Best}} class="best"{{end}} data-country="{{.Country}}">
               <td><a href="{{.URL}}" target="_blank" rel="noopener">{{.Site}}</a></td>
               <td class="country-name" data-code="{{.Country}}">{{.Country}}</td>
               <td class="desc">{{.Description}}</td>
-              <td class="num"><span class="price" data-amount="{{.Price}}" data-currency="{{.Currency}}">{{.Price}} {{.Currency}}</span><span class="vat vat-{{.VAT}}">{{.VATLabel}}</span></td>
-              <td class="num per-gram" data-eur="{{.PerGram}}">{{.PerGram}}</td>
+              <td class="num price-cell"><span class="price" data-amount="{{.Price}}" data-currency="{{.Currency}}">{{.Price}} {{.Currency}}</span><span class="vat vat-{{.VAT}}">{{.VATLabel}}</span></td>
+              <td class="num per-gram" data-eur="{{.PerGram}}" data-sort="{{.PerGram}}">{{.PerGram}}</td>
             </tr>
           {{end}}
           </tbody>
@@ -141,7 +145,7 @@
       <h2>Taxes by country</h2>
       <div class="table">
         <table>
-          <thead><tr><th>Country</th><th class="num">VAT</th><th>Investment gold</th><th>Silver, platinum, palladium, copper</th></tr></thead>
+          <thead><tr><th>Country</th><th class="num" data-sort-type="num">VAT</th><th>Investment gold</th><th>Silver, platinum, palladium, copper</th></tr></thead>
           <tbody>
           {{range .Taxes}}
             <tr><td class="country-name" data-code="{{.Country}}">{{.Country}}</td><td class="num">{{.VAT}}</td><td>{{.Gold}}</td><td>{{.Others}}</td></tr>
@@ -194,6 +198,7 @@
         const amount = parseFloat(td.dataset.amount);
         if (!from || isNaN(amount)) return;
         td.textContent = fmt(amount / from * to, cur);
+        td.parentElement.dataset.sort = amount / from; // sort by euro value
         td.title = cur === td.dataset.currency ? "" : `${td.dataset.amount} ${td.dataset.currency} on the site`;
       });
       document.querySelectorAll(".per-gram").forEach((td) => {
@@ -240,12 +245,16 @@
       for (const o of type.options) o.hidden = o.value !== "" && metal.value !== "" && o.dataset.metal !== metal.value;
       if (type.selectedOptions[0]?.hidden) { type.value = ""; store.set("type", ""); }
       document.querySelectorAll("section[data-type]").forEach((sec) => {
-        let first = true;
+        let first = true, best = null;
         sec.querySelectorAll("tbody tr").forEach((tr) => {
           tr.hidden = country.value !== "" && tr.dataset.country !== country.value;
-          tr.classList.toggle("best", !tr.hidden && first);
-          if (!tr.hidden) first = false;
+          tr.classList.remove("best");
+          if (tr.hidden) return;
+          first = false;
+          const perGram = parseFloat(tr.querySelector(".per-gram").dataset.eur);
+          if (!best || perGram < best.perGram) best = { tr, perGram };
         });
+        if (best) best.tr.classList.add("best");
         sec.hidden = (metal.value !== "" && sec.dataset.metal !== metal.value) ||
           (type.value !== "" && sec.dataset.type !== type.value) || first;
       });
@@ -257,6 +266,33 @@
     }
     filter();
   }
+
+  // Click a column header to sort its table; click again to reverse.
+  const sortCollator = new Intl.Collator(navigator.language, { numeric: true });
+  document.querySelectorAll(".table table").forEach((table) => {
+    const heads = table.querySelectorAll("thead th");
+    heads.forEach((th, col) => {
+      th.setAttribute("aria-sort", "none");
+      th.tabIndex = 0;
+      const sort = () => {
+        const dir = th.getAttribute("aria-sort") === "ascending" ? -1 : 1;
+        heads.forEach((h) => h.setAttribute("aria-sort", "none"));
+        th.setAttribute("aria-sort", dir === 1 ? "ascending" : "descending");
+        const numeric = th.dataset.sortType === "num";
+        const key = (tr) => {
+          const cell = tr.cells[col];
+          const v = cell.dataset.sort ?? cell.textContent.trim();
+          return numeric ? parseFloat(String(v).replace(",", ".")) : v;
+        };
+        const body = table.tBodies[0];
+        [...body.rows]
+          .sort((a, b) => dir * (numeric ? key(a) - key(b) : sortCollator.compare(key(a), key(b))))
+          .forEach((tr) => body.appendChild(tr));
+      };
+      th.addEventListener("click", sort);
+      th.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sort(); } });
+    });
+  });
 
   const top = document.querySelector(".to-top");
   const toggle = () => top.classList.toggle("visible", window.scrollY > 400);
