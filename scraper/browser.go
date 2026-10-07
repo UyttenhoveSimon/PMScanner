@@ -41,8 +41,8 @@ func findBrowser() (string, error) {
 }
 
 const (
-	browserTabs    = 3
-	pageTimeout    = 45 * time.Second
+	browserTabs    = 8
+	pageTimeout    = 30 * time.Second
 	pricePollDelay = 2 * time.Second
 	// settleDelay leaves bot challenges alone before the first DOM read;
 	// Cloudflare tends to fail its check when DevTools touches the page early.
