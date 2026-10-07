@@ -15,8 +15,8 @@ var (
 // products lists the pages to scan. Any shop page exposing schema.org price
 // data (JSON-LD, microdata or Open Graph) works without site-specific code.
 //
-// Browser: true marks shops behind a bot challenge (goldavenue: Vercel,
-// silvergoldbull: Cloudflare); they need a Chromium-based browser installed.
+// Browser: true marks shops behind a bot challenge (goldavenue: Vercel);
+// they need a Chromium-based browser installed.
 var products = []scraper.Product{
 	{Site: "or.fr", Description: "Gold bar 1kg Valcambi", WeightGrams: kg,
 		URL: "https://or.fr/achat/or/lingots/lingot-d-or-1-kilogramme-valcambi-60"},
@@ -121,16 +121,6 @@ var products = []scraper.Product{
 	{Site: "goldavenue", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, Browser: true, Cookies: eur,
 		URL: "https://www.goldavenue.com/en/buy/silver/product/1-ounce-silver-coin-canada-maple-leaf-2026"},
 
-	// silvergoldbull has no structured price data; read the "1+" row of the
-	// quantity price table, or the headline price when there is no table.
-	{Site: "silvergoldbull", Description: "Gold bar 1kg RCM", WeightGrams: kg, Browser: true, Selectors: sgbPrice,
-		URL: "https://silvergoldbull.be/1-kilo-gold-bar-royal-canadian-mint"},
-	{Site: "silvergoldbull", Description: "Gold Krugerrand 1oz", WeightGrams: oz, Browser: true, Selectors: sgbPrice,
-		URL: "https://silvergoldbull.be/1-oz-2026-krugerrand-gold-coin-rand-refinery"},
-	{Site: "silvergoldbull", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, Browser: true, Selectors: sgbPrice,
-		URL: "https://silvergoldbull.be/1-oz-2026-canadian-maple-leaf-gold-coin-royal-canadian-mint"},
-	{Site: "silvergoldbull", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, Browser: true, Selectors: sgbPrice,
-		URL: "https://silvergoldbull.be/1-oz-2026-canadian-maple-leaf-silver-coin-royal-canadian-mint"},
 	// Belgium
 	{Site: "goudwisselkantoor", Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://www.shop-goudwisselkantoor.be/goud-kopen/staven/goudstaaf-1000-gram-diverse-producenten"},
 	{Site: "goudwisselkantoor", Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://www.shop-goudwisselkantoor.be/goud-kopen/munten/gouden-krugerrand-1-oz-divers-jaar"},
@@ -472,9 +462,5 @@ var (
 	cssOnly    = []scraper.Source{scraper.CSS}
 	proaurumCH = []string{".price-ask_price .price"}
 	// goldavenue defaults to CHF.
-	eur      = map[string]string{"currency": "EUR"}
-	sgbPrice = []string{
-		`div[class~="tw:grid-cols-10"] > div:containsOwn("1+") + div`,
-		`h1 + div > div[class~="tw:font-bold"]`,
-	}
+	eur = map[string]string{"currency": "EUR"}
 )
