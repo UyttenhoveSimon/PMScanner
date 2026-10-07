@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore: ["data/**"] # scans added by the Pages workflow
   pull_request:
 
 permissions:

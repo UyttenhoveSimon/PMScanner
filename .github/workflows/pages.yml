@@ -1,8 +1,8 @@
 name: Pages
 
 # Scans prices once a day and publishes the web page to GitHub Pages.
-# The price database lives on the `data` branch, as a single commit that is
-# replaced on every scan so the repository does not grow with each copy.
+# Every scan is kept as a small file in data/scans on main; the database is
+# rebuilt from those files on each run.
 
 on:
   schedule:
@@ -14,13 +14,10 @@ on:
         type: boolean
         default: true
   push:
-    # Republish without scanning when the page changes (main) or when a scan
-    # made elsewhere is added to the database (data). The workflow's own
-    # pushes to data use GITHUB_TOKEN, which does not trigger workflows.
-    branches: [main, data]
+    branches: [main] # republish page changes and locally made scans
 
 permissions:
-  contents: write # push the database to the data branch
+  contents: write # commit new scans to main
   pages: write
   id-token: write
 
@@ -37,21 +34,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main # the data branch only holds the database
+          fetch-depth: 0 # full history, so the scan commit can rebase onto main
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-
-      - name: Restore the database
-        id: restore
-        run: |
-          if git fetch --depth=1 origin data && git show FETCH_HEAD:pmscanner.db > pmscanner.db; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            rm -f pmscanner.db
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Build
         run: CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o pmscanner .
@@ -61,30 +48,25 @@ jobs:
         if: >-
           github.event_name == 'schedule' ||
           (github.event_name == 'workflow_dispatch' && inputs.scan) ||
-          steps.restore.outputs.found != 'true'
-        run: ./pmscanner -db pmscanner.db > scan.txt
+          hashFiles('data/scans/*.json.gz') == ''
+        run: ./pmscanner -db "$RUNNER_TEMP/pmscanner.db" -history data/scans > scan.txt
 
       - name: Show failures
         if: steps.scan.outcome != 'skipped'
-        run: grep -i error scan.txt || echo "no failures"
+        run: grep 'error:' scan.txt || echo "no failures"
 
-      - name: Save the database
+      - name: Commit the scan
         if: steps.scan.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          dir=$(mktemp -d)
-          cp pmscanner.db "$dir/"
-          cd "$dir"
-          git init -q -b data
-          git add pmscanner.db
+          git add data/scans
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-              commit -q -m "Price database"
-          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data
+              commit -q -m "Add scanned prices" || exit 0
+          git pull -q --rebase origin main
+          git push -q origin HEAD:main
 
       - name: Export the page
-        run: ./pmscanner -db pmscanner.db -export site
+        run: ./pmscanner -db "$RUNNER_TEMP/pmscanner.db" -history data/scans -export site
 
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 

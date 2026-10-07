@@ -96,8 +96,12 @@ go run . -export site
 ```
 
 The [Pages workflow](.github/workflows/pages.yml) does this every day on GitHub:
-it scans, keeps the database on the `data` branch, and publishes the result to
-GitHub Pages. It can also be run by hand from the Actions tab.
+it scans, commits the scan to [`data/scans`](data/scans), and publishes the
+result to GitHub Pages. It can also be run by hand from the Actions tab.
+
+Each scan is kept as a small compressed JSON file (about 50 KB) rather than
+committing the growing SQLite database; `-history data/scans` loads the files
+into the database and writes new scans back.
 
 Some shops block GitHub's servers. To scan from your own machine and publish
 the result instead, run:
@@ -106,8 +110,9 @@ the result instead, run:
 scripts/publish-local.sh
 ```
 
-It adds the scan to the published database on the `data` branch; pushing it
-makes the Pages workflow republish the site without scanning again.
+It commits the scan to `data/scans` and pushes it, which makes the Pages
+workflow republish the site without scanning again. Only people with push
+access to the repository can publish; visitors just read the site.
 
 ### Browser mode
 
