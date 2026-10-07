@@ -34,7 +34,8 @@
     border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
   .toolbar label { display: flex; align-items: center; gap: 6px; }
   section { margin-top: 28px; scroll-margin-top: 64px; }
-  section[hidden] { display: none; }
+  section[hidden], tr[hidden] { display: none; }
+  td.country-name { color: var(--muted); }
   .to-top { position: fixed; right: 16px; bottom: 16px; width: 40px; height: 40px; border-radius: 50%;
     border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 18px;
     cursor: pointer; box-shadow: 0 2px 8px rgb(0 0 0 / 0.12); opacity: 0; pointer-events: none;
@@ -91,6 +92,12 @@
           {{range .Groups}}{{if .Rows}}<option value="{{.Name}}">{{.Name}}</option>{{end}}{{end}}
         </select>
       </label>
+      <label>Country
+        <select id="country">
+          <option value="">All countries</option>
+          {{range .Countries}}<option value="{{.}}" class="country-name">{{.}}</option>{{end}}
+        </select>
+      </label>
       <label>Currency
         <select id="currency">
           {{range .Currencies}}<option value="{{.}}">{{.}}</option>{{end}}
@@ -102,11 +109,12 @@
       <h2>{{.Name}}</h2>
       <div class="table">
         <table>
-          <thead><tr><th>Shop</th><th>Product</th><th class="num">Price</th><th class="num"><span class="cur-label">EUR</span> / gram</th></tr></thead>
+          <thead><tr><th>Shop</th><th>Country</th><th>Product</th><th class="num">Price</th><th class="num"><span class="cur-label">EUR</span> / gram</th></tr></thead>
           <tbody>
           {{range .Rows}}
-            <tr{{if .Best}} class="best"{{end}}>
+            <tr{{if .Best}} class="best"{{end}} data-country="{{.Country}}">
               <td><a href="{{.URL}}" target="_blank" rel="noopener">{{.Site}}</a></td>
+              <td class="country-name" data-code="{{.Country}}">{{.Country}}</td>
               <td class="desc">{{.Description}}</td>
               <td class="num price" data-amount="{{.Price}}" data-currency="{{.Currency}}">{{.Price}} {{.Currency}}</td>
               <td class="num per-gram" data-eur="{{.PerGram}}">{{.PerGram}}</td>
@@ -172,17 +180,35 @@
     currency.addEventListener("change", () => { store.set("currency", currency.value); apply(currency.value); });
   }
 
+  // Country codes shown as names in the visitor's language.
+  let names = null;
+  try { names = new Intl.DisplayNames([navigator.language, "en"], { type: "region" }); } catch {}
+  document.querySelectorAll(".country-name").forEach((el) => {
+    const code = el.dataset.code || el.value;
+    if (names && code) el.textContent = names.of(code);
+  });
+
+  // Type and country filters; the cheapest badge follows the visible rows.
   const type = document.getElementById("type");
-  if (type) {
-    const show = (t) => {
+  const country = document.getElementById("country");
+  if (type && country) {
+    const filter = () => {
       document.querySelectorAll("section[data-type]").forEach((sec) => {
-        sec.hidden = t !== "" && sec.dataset.type !== t;
+        let first = true;
+        sec.querySelectorAll("tbody tr").forEach((tr) => {
+          tr.hidden = country.value !== "" && tr.dataset.country !== country.value;
+          tr.classList.toggle("best", !tr.hidden && first);
+          if (!tr.hidden) first = false;
+        });
+        sec.hidden = (type.value !== "" && sec.dataset.type !== type.value) || first;
       });
     };
-    const saved = store.get("type");
-    if (saved !== null && [...type.options].some((o) => o.value === saved)) type.value = saved;
-    show(type.value);
-    type.addEventListener("change", () => { store.set("type", type.value); show(type.value); });
+    for (const [el, key] of [[type, "type"], [country, "country"]]) {
+      const saved = store.get(key);
+      if (saved !== null && [...el.options].some((o) => o.value === saved)) el.value = saved;
+      el.addEventListener("change", () => { store.set(key, el.value); filter(); });
+    }
+    filter();
   }
 
   const top = document.querySelector(".to-top");

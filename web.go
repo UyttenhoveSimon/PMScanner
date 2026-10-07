@@ -33,6 +33,15 @@ var categories = []string{
 
 const otherCategory = "Other"
 
+// countryByURL fills in the country of prices saved before it was recorded.
+var countryByURL = func() map[string]string {
+	m := make(map[string]string, len(products))
+	for _, p := range products {
+		m[p.URL] = p.Country
+	}
+	return m
+}()
+
 // scanListLimit caps how many past scans the page and API list.
 const scanListLimit = 500
 
@@ -199,8 +208,8 @@ func (s *server) scanID(r *http.Request) (int64, error) {
 }
 
 type row struct {
-	Site, Description, URL, Price, PerGram, Currency, Error string
-	Best                                                    bool
+	Site, Country, Description, URL, Price, PerGram, Currency, Error string
+	Best                                                             bool
 }
 
 type group struct {
@@ -218,6 +227,7 @@ type pageData struct {
 	Groups     []group
 	Rates      map[string]float64 // units per euro, for switching currency in the page
 	Currencies []string
+	Countries  []string
 	Failed     []row
 	Scanned    string
 	Scanning   bool
@@ -276,15 +286,23 @@ func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 	for i := range data.Groups {
 		byName[data.Groups[i].Name] = &data.Groups[i]
 	}
+	countries := map[string]bool{}
 	// Prices are saved sorted by price per gram.
 	for _, p := range prices {
-		rw := row{Site: p.Site, Description: p.Description, URL: p.URL}
+		country := p.Country
+		if country == "" {
+			country = countryByURL[p.URL] // scans saved before countries were recorded
+		}
+		rw := row{Site: p.Site, Country: country, Description: p.Description, URL: p.URL}
 		if p.Error != "" {
 			rw.Error = p.Error
 			data.Failed = append(data.Failed, rw)
 			continue
 		}
 		rw.Price, rw.PerGram, rw.Currency = p.Price.StringFixed(2), p.EURPerGram.StringFixed(2), p.Currency
+		if country != "" {
+			countries[country] = true
+		}
 		g, ok := byName[p.Category]
 		if !ok {
 			g = byName[otherCategory]
@@ -292,6 +310,10 @@ func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 		rw.Best = len(g.Rows) == 0
 		g.Rows = append(g.Rows, rw)
 	}
+	for c := range countries {
+		data.Countries = append(data.Countries, c)
+	}
+	slices.Sort(data.Countries)
 	s.render(w, data)
 }
 
@@ -320,6 +342,7 @@ func (s *server) handlePrices(w http.ResponseWriter, r *http.Request) {
 	}
 	type item struct {
 		Site        string  `json:"site"`
+		Country     string  `json:"country,omitempty"`
 		Category    string  `json:"category"`
 		Description string  `json:"description"`
 		URL         string  `json:"url"`
@@ -330,7 +353,10 @@ func (s *server) handlePrices(w http.ResponseWriter, r *http.Request) {
 	}
 	items := make([]item, 0, len(prices))
 	for _, p := range prices {
-		it := item{Site: p.Site, Category: p.Category, Description: p.Description, URL: p.URL, Error: p.Error}
+		it := item{Site: p.Site, Country: p.Country, Category: p.Category, Description: p.Description, URL: p.URL, Error: p.Error}
+		if it.Country == "" {
+			it.Country = countryByURL[p.URL]
+		}
 		if p.Error == "" {
 			it.Price, _ = p.Price.Float64()
 			it.EURPerGram, _ = p.EURPerGram.Round(4).Float64()

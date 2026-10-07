@@ -47,7 +47,7 @@ go run . -serve :8080
 ```
 
 Open <http://localhost:8080>. Prices are grouped by product with the cheapest
-offer highlighted. The bar at the top filters by product **Type** and converts
+offer highlighted. The bar at the top filters by product **Type** and shop **Country**, and converts
 all prices to another **Currency** on the fly (ECB rates); both choices are
 remembered. Use the **Scan** menu to look at a past scan.
 
@@ -84,7 +84,7 @@ PMSCANNER_BROWSER="/path/to/browser" go run .
 Add an entry to [`products.go`](products.go):
 
 ```go
-{Site: "myshop", Description: "Gold Krugerrand 1oz", WeightGrams: oz,
+{Site: "myshop", Country: "BE", Description: "Gold Krugerrand 1oz", WeightGrams: oz,
     URL: "https://myshop.example/krugerrand-1oz"},
 ```
 
