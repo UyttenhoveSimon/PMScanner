@@ -31,10 +31,14 @@ echo "Failures:"
 grep 'error:' "$work/scan.txt" || echo "none"
 
 echo "Publishing the database to the data branch…"
+# GitHub runs push-triggered workflows from the pushed branch, so the data
+# branch carries a copy of the Pages workflow next to the database.
+mkdir -p "$work/.github/workflows"
+cp .github/workflows/pages.yml "$work/.github/workflows/"
 (
 	cd "$work"
 	git init -q -b data
-	git add pmscanner.db
+	git add pmscanner.db .github
 	git commit -q -m "Price database"
 	git push -q -f "$remote" data
 )
