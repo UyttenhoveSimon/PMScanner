@@ -32,6 +32,12 @@ var categories = []string{
 	"Gold Vreneli 20 CHF",
 	"Gold Napoleon 20 FF",
 	"Silver Maple Leaf 1oz",
+	"Silver bar 1kg",
+	"Platinum bar 1oz",
+	"Platinum coin 1oz",
+	"Palladium bar 1oz",
+	"Palladium coin 1oz",
+	"Copper bar 1kg",
 }
 
 const otherCategory = "Other"
