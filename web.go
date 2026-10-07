@@ -64,12 +64,23 @@ func runServer(addr string, refresh time.Duration, db *store.Store) error {
 	mux.HandleFunc("GET /{$}", s.handlePage)
 	mux.HandleFunc("GET /api/prices", s.handlePrices)
 	mux.HandleFunc("GET /api/scans", s.handleScans)
+	url := "http://" + displayAddr(ln.Addr())
 	if refresh > 0 {
-		log.Printf("serving on http://%s (rescan every %s)", ln.Addr(), refresh)
+		log.Printf("serving on %s (rescan every %s)", url, refresh)
 	} else {
-		log.Printf("serving on http://%s (automatic rescans off)", ln.Addr())
+		log.Printf("serving on %s (automatic rescans off)", url)
 	}
 	return http.Serve(ln, mux)
+}
+
+// displayAddr shows a listen address as a URL host, using localhost when
+// listening on all interfaces.
+func displayAddr(addr net.Addr) string {
+	tcp, ok := addr.(*net.TCPAddr)
+	if !ok || !tcp.IP.IsUnspecified() {
+		return addr.String()
+	}
+	return net.JoinHostPort("localhost", strconv.Itoa(tcp.Port))
 }
 
 // scanEvery rescans at the given interval, counting from the latest saved
