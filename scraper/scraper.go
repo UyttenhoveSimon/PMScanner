@@ -11,7 +11,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"sync"
@@ -74,24 +76,82 @@ const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/5
 
 var errNoPrice = errors.New("no price found")
 
+const (
+	// maxRequests caps plain HTTP requests in flight across all shops.
+	maxRequests = 32
+	// maxRequestsPerHost keeps the load on each shop low, so a slow shop
+	// does not hold up the others and shops are less likely to block us.
+	maxRequestsPerHost = 2
+)
+
+// hostOf returns the URL's host without a "www." prefix, or the URL itself
+// if it cannot be parsed.
+func hostOf(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Hostname() == "" {
+		return rawURL
+	}
+	return strings.TrimPrefix(u.Hostname(), "www.")
+}
+
+// hostState limits concurrent requests to one shop and remembers when it
+// timed out, so its other products fail fast instead of waiting too.
+type hostState struct {
+	slots chan struct{}
+	mu    sync.Mutex
+	err   error
+}
+
+func (h *hostState) markUnreachable(err error) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.err == nil {
+		h.err = fmt.Errorf("skipped, shop timed out: %w", err)
+	}
+}
+
+func (h *hostState) unreachable() error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.err
+}
+
 // Scrape fetches every product concurrently and returns results in input order.
 func Scrape(products []Product) []Result {
 	results := make([]Result, len(products))
 	var browserIdx []int
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 8)
+	global := make(chan struct{}, maxRequests)
+	hosts := map[string]*hostState{}
 	for i, p := range products {
 		results[i].Product = p
 		if p.Browser {
 			browserIdx = append(browserIdx, i)
 			continue
 		}
+		host := hosts[hostOf(p.URL)]
+		if host == nil {
+			host = &hostState{slots: make(chan struct{}, maxRequestsPerHost)}
+			hosts[hostOf(p.URL)] = host
+		}
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			sem <- struct{}{}
-			defer func() { <-sem }()
-			results[i].Price, results[i].Currency, results[i].Err = scrapeHTTP(p)
+			// Take the host slot first so a busy host never holds a global one.
+			host.slots <- struct{}{}
+			defer func() { <-host.slots }()
+			if err := host.unreachable(); err != nil {
+				results[i].Err = err
+				return
+			}
+			global <- struct{}{}
+			defer func() { <-global }()
+			r := &results[i]
+			r.Price, r.Currency, r.Err = scrapeHTTP(p)
+			var netErr net.Error
+			if errors.As(r.Err, &netErr) && netErr.Timeout() {
+				host.markUnreachable(r.Err)
+			}
 		}()
 	}
 	if len(browserIdx) > 0 {

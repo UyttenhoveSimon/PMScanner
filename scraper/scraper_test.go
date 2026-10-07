@@ -29,3 +29,17 @@ func TestFromJSONLD(t *testing.T) {
 		t.Errorf("got %v %q %v", p, c, ok)
 	}
 }
+
+func TestHostOf(t *testing.T) {
+	cases := map[string]string{
+		"https://www.or.fr/achat/x":   "or.fr",
+		"https://or.fr/achat/y":       "or.fr",
+		"https://shop.example.com:81": "shop.example.com",
+		"not a url":                   "not a url",
+	}
+	for in, want := range cases {
+		if got := hostOf(in); got != want {
+			t.Errorf("hostOf(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
