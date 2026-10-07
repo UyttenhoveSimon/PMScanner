@@ -8,11 +8,13 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"pmscanner/fx"
 	"pmscanner/store"
 )
 
@@ -47,6 +49,8 @@ func categoryOf(description string) string {
 type server struct {
 	db       *store.Store
 	mu       sync.RWMutex
+	rates    fx.Rates
+	ratesAt  time.Time
 	scanning bool
 	lastRun  time.Time // last scan attempt, even if it could not be saved
 }
@@ -130,6 +134,46 @@ func (s *server) rescan() {
 	}
 }
 
+// ratesMaxAge is how long ECB rates are reused; the ECB publishes once a day.
+const ratesMaxAge = 6 * time.Hour
+
+// preferredCurrencies are listed first in the currency menu.
+var preferredCurrencies = []string{"EUR", "USD", "GBP", "CHF"}
+
+// currencies returns the exchange rates for the page, as units per euro, and
+// the currency menu. Without rates, only EUR is offered.
+func (s *server) currencies() (map[string]float64, []string) {
+	s.mu.RLock()
+	rates, stale := s.rates, time.Since(s.ratesAt) > ratesMaxAge
+	s.mu.RUnlock()
+	if stale {
+		// Fetched outside the lock; concurrent requests may both fetch, which is harmless.
+		if fresh, err := fx.FetchECB(); err == nil {
+			rates = fresh
+			s.mu.Lock()
+			s.rates, s.ratesAt = fresh, time.Now()
+			s.mu.Unlock()
+		} else {
+			log.Printf("exchange rates: %v", err)
+		}
+	}
+
+	out := map[string]float64{"EUR": 1}
+	for cur, r := range rates {
+		out[cur], _ = r.Float64()
+	}
+	names := append([]string(nil), preferredCurrencies...)
+	var others []string
+	for cur := range out {
+		if !slices.Contains(names, cur) {
+			others = append(others, cur)
+		}
+	}
+	slices.Sort(others)
+	names = slices.DeleteFunc(names, func(c string) bool { _, ok := out[c]; return !ok })
+	return out, append(names, others...)
+}
+
 func (s *server) setScanning(v bool) {
 	s.mu.Lock()
 	s.scanning = v
@@ -171,18 +215,21 @@ type scanOption struct {
 }
 
 type pageData struct {
-	Groups   []group
-	Failed   []row
-	Scanned  string
-	Scanning bool
-	IsLatest bool
-	Scans    []scanOption
+	Groups     []group
+	Rates      map[string]float64 // units per euro, for switching currency in the page
+	Currencies []string
+	Failed     []row
+	Scanned    string
+	Scanning   bool
+	IsLatest   bool
+	Scans      []scanOption
 }
 
 const timeFormat = "2006-01-02 15:04"
 
 func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 	data := pageData{Scanning: s.isScanning()}
+	data.Rates, data.Currencies = s.currencies()
 
 	id, err := s.scanID(r)
 	switch {
