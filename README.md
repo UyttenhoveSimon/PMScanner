@@ -99,6 +99,16 @@ The [Pages workflow](.github/workflows/pages.yml) does this every day on GitHub:
 it scans, keeps the database on the `data` branch, and publishes the result to
 GitHub Pages. It can also be run by hand from the Actions tab.
 
+Some shops block GitHub's servers. To scan from your own machine and publish
+the result instead, run:
+
+```sh
+scripts/publish-local.sh
+```
+
+It adds the scan to the published database on the `data` branch and asks the
+Pages workflow to republish the site without scanning again (requires `gh`).
+
 ### Browser mode
 
 Products marked `Browser: true` need a Chromium-based browser (Chrome, Chromium,
