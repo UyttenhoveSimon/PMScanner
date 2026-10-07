@@ -1,6 +1,9 @@
 package scraper
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestParsePrice(t *testing.T) {
 	cases := map[string]string{
@@ -40,6 +43,20 @@ func TestHostOf(t *testing.T) {
 	for in, want := range cases {
 		if got := hostOf(in); got != want {
 			t.Errorf("hostOf(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestRetryDelay(t *testing.T) {
+	cases := map[string]time.Duration{
+		"":                              3 * time.Second,
+		"5":                             5 * time.Second,
+		"600":                           15 * time.Second,
+		"Wed, 21 Oct 2026 07:28:00 GMT": 3 * time.Second,
+	}
+	for in, want := range cases {
+		if got := retryDelay(in); got != want {
+			t.Errorf("retryDelay(%q) = %v, want %v", in, got, want)
 		}
 	}
 }

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -43,7 +44,7 @@ type Product struct {
 	Country     string // ISO 3166-1 alpha-2 code of the shop's country
 	Description string
 	URL         string
-	WeightGrams decimal.Decimal
+	WeightGrams decimal.Decimal // fine metal content, so prices compare per gram of pure metal
 	// Sources overrides DefaultSources, for shops whose preferred source
 	// holds the wrong price (e.g. a buy-back price in JSON-LD).
 	Sources []Source
@@ -168,10 +169,30 @@ func Scrape(products []Product) []Result {
 
 var client = &http.Client{Timeout: 30 * time.Second}
 
+// maxRetries is how many times a request answered with HTTP 429 (too many
+// requests) is retried, after the delay the shop asks for.
+const maxRetries = 2
+
 func scrapeHTTP(p Product) (decimal.Decimal, string, error) {
+	for attempt := 0; ; attempt++ {
+		body, retryAfter, err := fetch(p)
+		if retryAfter > 0 && attempt < maxRetries {
+			time.Sleep(retryAfter)
+			continue
+		}
+		if err != nil {
+			return decimal.Zero, "", err
+		}
+		return extract(body, p)
+	}
+}
+
+// fetch gets a product page. When the shop rate-limits the request, it also
+// returns how long to wait before trying again.
+func fetch(p Product) (body []byte, retryAfter time.Duration, err error) {
 	req, err := http.NewRequest("GET", p.URL, nil)
 	if err != nil {
-		return decimal.Zero, "", err
+		return nil, 0, err
 	}
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept-Language", "en,fr;q=0.8,de;q=0.6")
@@ -180,17 +201,31 @@ func scrapeHTTP(p Product) (decimal.Decimal, string, error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return decimal.Zero, "", fmt.Errorf("fetch: %w", err)
+		return nil, 0, fmt.Errorf("fetch: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusTooManyRequests {
+		return nil, retryDelay(resp.Header.Get("Retry-After")), fmt.Errorf("fetch: HTTP %d", resp.StatusCode)
+	}
 	if resp.StatusCode != http.StatusOK {
-		return decimal.Zero, "", fmt.Errorf("fetch: HTTP %d", resp.StatusCode)
+		return nil, 0, fmt.Errorf("fetch: HTTP %d", resp.StatusCode)
 	}
-	body, err := io.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return decimal.Zero, "", fmt.Errorf("fetch: %w", err)
+		return nil, 0, fmt.Errorf("fetch: %w", err)
 	}
-	return extract(body, p)
+	return body, 0, nil
+}
+
+// retryDelay reads a Retry-After header given in seconds, defaulting to a
+// few seconds and capped so one shop cannot stall the scan.
+func retryDelay(header string) time.Duration {
+	const fallback, limit = 3 * time.Second, 15 * time.Second
+	secs, err := strconv.Atoi(strings.TrimSpace(header))
+	if err != nil || secs <= 0 {
+		return fallback
+	}
+	return min(time.Duration(secs)*time.Second, limit)
 }
 
 // extract finds the product price in a page, trying sources in order.
