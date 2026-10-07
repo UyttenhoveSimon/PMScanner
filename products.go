@@ -1036,6 +1036,24 @@ var products = []scraper.Product{
 		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-5/stype-1/produit?livraison=1&market_sorter=price_asc"},
 	{Site: "aucoffre", Country: "FR", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
 		URL: "https://www.aucoffre.com/recherche/metal-5/marketing_list-12/stype-319/produit?livraison=1&market_sorter=price_asc"},
+
+	// Russia
+	{Site: "tsbnk", Country: "RU", Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://coins.tsbnk.ru/katalog/slitki/zolotoy-slitok-999-9-proby-1000-gr-rossiya/"},
+	{Site: "zolotoy-zapas", Country: "RU", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.zolotoy-zapas.ru/coins-price/maple-leaf-silver-1-oz-coins-until-2013/"},
+	{Site: "zoloto-md", Country: "RU", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/zolotaya-moneta-kanadyi-klenovyij-list-2026-g.v.,-31.1-g-chistogo-zolota-proba-9999"},
+	{Site: "zoloto-md", Country: "RU", Description: "Gold Philharmonic 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/zolotaya-moneta-avstrii-filarmoniker-2026-g.v.,-31.1-g-chistogo-zolota-proba-9999"},
+	{Site: "zoloto-md", Country: "RU", Description: "Gold Britannia 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/zolotaya-moneta-velikobritanii-britaniya-2026-g.v.,-31.1-g-chistogo-zolota-proba-9999"},
+	{Site: "zoloto-md", Country: "RU", Description: "Gold Eagle 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/zolotaya-investiczionnaya-moneta-ssha-amerikanskij-orel-2015-10-19-18-13-38"},
+	{Site: "zoloto-md", Country: "RU", Description: "Gold Kangaroo 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/zolotaya-moneta-avstralii-kenguru-2026-g.v.,-31.1-g-chistogo-zolota-proba-9999"},
+	{Site: "zoloto-md", Country: "RU", Description: "Gold Sovereign", WeightGrams: sovereign, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/zolotaya-investiczionnaya-moneta-soveren-raznyie-godyi-velikobritaniya"},
+	{Site: "zoloto-md", Country: "RU", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/serebryanaya-investiczionnaya-moneta-kanadskij-klenovyij-list"},
+	{Site: "zoloto-md", Country: "RU", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/platinovaya-moneta-kanadyi-klenovyij-list-charlz-iii,-31.1-g-chistoj-platinyi-proba-9995"},
+	{Site: "zoloto-md", Country: "RU", Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/platinovaya-moneta-avstralii-kenguru"},
+	{Site: "zoloto-md", Country: "RU", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/platinovaya-moneta-avstrii-venskij-filarmoniker-2016-02-26-17-21-27"},
+	{Site: "zoloto-md", Country: "RU", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/platinovaya-moneta-velikobritanii-britaniya-2018-g.,-31,1-g-chistoj-platinyi-proba-0,9995"},
+	{Site: "zoloto-md", Country: "RU", Description: "Platinum coin 1oz Eagle", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/platinovaya-moneta-ssha-statuya-svobodyi,-31.1-g-chistoj-platinyi-proba-0.9995"},
+	// Azerbaijan
+	{Site: "azergold", Country: "AZ", Description: "Silver bar 1kg", WeightGrams: kg, Sources: cssOnly, Selectors: []string{"p.product-price"}, URL: "https://www.azergold.gift/mehsul/64"},
 }
 
 var (
@@ -1047,6 +1065,7 @@ var (
 	cssOnly    = []scraper.Source{scraper.CSS}
 	proaurumCH = []string{".price-ask_price .price"}
 	aucoffre   = []string{"article.product-card .product-price p:first-child"}
+	zolotoMD   = []string{".product_price-box div.product_price:not(.product_price__buyout) > span"}
 	// goldavenue defaults to CHF.
 	eur = map[string]string{"currency": "EUR"}
 )
