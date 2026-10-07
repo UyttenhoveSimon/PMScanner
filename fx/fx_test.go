@@ -33,3 +33,17 @@ func TestToEUR(t *testing.T) {
 		t.Error("expected error for unknown currency")
 	}
 }
+
+func TestParseFallback(t *testing.T) {
+	rates, err := parseFallback(strings.NewReader(`{"result":"success","rates":{"EUR":1,"RUB":96.5302,"KZT":509.35}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := rates.ToEUR(decimal.RequireFromString("965.302"), "RUB")
+	if err != nil || !got.Equal(decimal.NewFromInt(10)) {
+		t.Errorf("965.302 RUB = %v, %v; want 10", got, err)
+	}
+	if _, err := parseFallback(strings.NewReader(`{"result":"error"}`)); err == nil {
+		t.Error("expected error for failed result")
+	}
+}

@@ -43,7 +43,7 @@ func exportSite(dir string, db *store.Store) error {
 	if len(scans) == 0 {
 		return fmt.Errorf("no scan to export; run a scan first")
 	}
-	rates, err := fx.FetchECB()
+	rates, err := fx.FetchRates()
 	if err != nil {
 		log.Printf("exchange rates: %v (the page will only offer EUR)", err)
 	}

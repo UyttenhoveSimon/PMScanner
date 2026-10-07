@@ -103,10 +103,10 @@ func (s *server) rescan() {
 	}
 }
 
-// ratesMaxAge is how long ECB rates are reused; the ECB publishes once a day.
+// ratesMaxAge is how long exchange rates are reused; they change once a day.
 const ratesMaxAge = 6 * time.Hour
 
-// currentRates returns cached ECB rates, refreshing them when stale.
+// currentRates returns cached exchange rates, refreshing them when stale.
 func (s *server) currentRates() fx.Rates {
 	s.mu.RLock()
 	rates, stale := s.rates, time.Since(s.ratesAt) > ratesMaxAge
@@ -115,7 +115,7 @@ func (s *server) currentRates() fx.Rates {
 		return rates
 	}
 	// Fetched outside the lock; concurrent requests may both fetch, which is harmless.
-	fresh, err := fx.FetchECB()
+	fresh, err := fx.FetchRates()
 	if err != nil {
 		log.Printf("exchange rates: %v", err)
 		return rates

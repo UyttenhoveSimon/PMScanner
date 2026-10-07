@@ -65,7 +65,7 @@ type entry struct {
 
 // scan scrapes all products, cheapest price per gram first and failures last.
 func scan() []entry {
-	rates, ratesErr := fx.FetchECB()
+	rates, ratesErr := fx.FetchRates()
 	if ratesErr != nil {
 		log.Printf("prices in other currencies than EUR will fail: %v", ratesErr)
 	}
