@@ -213,8 +213,22 @@
       });
       document.querySelectorAll(".cur-label").forEach((el) => { el.textContent = cur; });
     };
+    // Default to the visitor's currency, from their browser's region, if
+    // offered; otherwise euros.
+    const regionCurrency = { CH: "CHF", LI: "CHF", GB: "GBP", US: "USD", PL: "PLN", CZ: "CZK", HU: "HUF",
+      RO: "RON", SE: "SEK", DK: "DKK", NO: "NOK", TR: "TRY", RU: "RUB", AZ: "AZN" };
+    const visitorCurrency = () => {
+      for (const lang of navigator.languages || [navigator.language]) {
+        try {
+          const region = new Intl.Locale(lang).maximize().region;
+          if (region) return regionCurrency[region] || "EUR";
+        } catch {}
+      }
+      return "EUR";
+    };
     const saved = store.get("currency");
-    if (saved && rates[saved]) currency.value = saved;
+    const initial = saved && rates[saved] ? saved : visitorCurrency();
+    currency.value = [...currency.options].some((o) => o.value === initial) ? initial : "EUR";
     apply(currency.value);
     currency.addEventListener("change", () => { store.set("currency", currency.value); apply(currency.value); });
   }
