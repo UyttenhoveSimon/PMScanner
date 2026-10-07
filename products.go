@@ -438,7 +438,6 @@ var products = []scraper.Product{
 	{Site: "eurex.ee", Country: "EE", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://eurex.ee/en/shop/1-oz-maple-leaf-gold-coin-2026-104320"},
 	{Site: "eurex.ee", Country: "EE", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://eurex.ee/en/shop/1-oz-maple-leaf-silver-coin-2026-204276"},
 	{Site: "tavast", Country: "EE", Description: "Gold bar 1kg UBS", WeightGrams: kg, URL: "https://gold.tavast.eu/product/kuldplaat-ubs-1000g/"},
-	{Site: "tavast", Country: "EE", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://gold.tavast.eu/product/hobemunt-maple-leaf-1-oz-2016/"},
 
 	// Latvia
 	{Site: "tavex.lv", Country: "LV", Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://tavex.lv/en/gold/1000g-gold-bar/"},
