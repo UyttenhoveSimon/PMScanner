@@ -156,17 +156,20 @@ type pageData struct {
 	Countries  []string
 	Metals     []string // in category order
 	Taxes      []taxRow // for the countries on the page
-	Failed     []row
-	Scanned    string
-	Scanning   bool
-	IsLatest   bool
-	Scans      []scanOption
-	JSONURL    string
-	LatestURL  string
+
+	// Currencies in the menu by rate source, for the exchange rate note.
+	ECBCurrencies, FallbackCurrencies []string
+	Failed                            []row
+	Scanned                           string
+	Scanning                          bool
+	IsLatest                          bool
+	Scans                             []scanOption
+	JSONURL                           string
+	LatestURL                         string
 }
 
 // buildPage gathers everything the page shows for one scan.
-func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, error) {
+func buildPage(db *store.Store, id int64, l links, rates fx.Rates, origins fx.Origins) (pageData, error) {
 	var data pageData
 
 	scanned, prices, err := db.Prices(id)
@@ -236,6 +239,14 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 		used = append(used, p.Currency)
 	}
 	data.Rates, data.Currencies = currencyMenu(rates, used)
+	for _, cur := range data.Currencies {
+		switch origins[cur] {
+		case fx.SourceECB:
+			data.ECBCurrencies = append(data.ECBCurrencies, cur)
+		case fx.SourceFallback:
+			data.FallbackCurrencies = append(data.FallbackCurrencies, cur)
+		}
+	}
 	for _, c := range data.Countries {
 		if t, ok := taxes[c]; ok {
 			data.Taxes = append(data.Taxes, taxRow{Country: c, VAT: t.VAT.String() + "%", Gold: t.Gold, Others: t.Others})

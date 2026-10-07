@@ -36,6 +36,7 @@
   section { margin-top: 28px; scroll-margin-top: 64px; }
   section[hidden], tr[hidden] { display: none; }
   td.country-name { color: var(--muted); }
+  .help { font-size: 12px; color: var(--muted); }
   .vat { display: block; font-size: 11px; color: var(--muted); }
   .vat-excluded { color: var(--err); }
   .taxes td { white-space: normal; vertical-align: top; }
@@ -115,6 +116,7 @@
           {{range .Currencies}}<option value="{{.}}">{{.}}</option>{{end}}
         </select>
       </label>
+      <a href="#rates" class="help" title="How exchange rates are obtained">About rates</a>
     </div>
     <p class="note">Prices per gram are what you pay: investment gold is VAT exempt, other metals include VAT (on the full price, or on the dealer's margin only), and VAT is added for shops that quote without it. Metal kept in a vault can be VAT-free. See <a href="#taxes">taxes by country</a>.</p>
     {{range .Groups}}{{if .Rows}}
@@ -155,6 +157,12 @@
       <p class="note">In the EU, investment gold is VAT exempt: bars of at least 99.5% purity and coins of at least 90% minted after 1800. Under the margin scheme, VAT is charged on the dealer's margin only and is included in the price. Standard rates as of 2026, for information only; check with the dealer or a tax adviser before buying.</p>
     </section>
     {{end}}
+
+    <section id="rates" class="taxes">
+      <h2>Exchange rates</h2>
+      <p class="note">Prices are ranked in euros. Each price is converted at the exchange rate of the day of its scan, and the price per gram includes VAT as explained above. The Currency menu then converts all prices with the latest rates.</p>
+      <p class="note">Rates are the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" target="_blank" rel="noopener">European Central Bank's daily euro reference rates</a>{{if .ECBCurrencies}} ({{range $i, $c := .ECBCurrencies}}{{if $i}}, {{end}}{{$c}}{{end}}){{end}}, published on working days around 16:00 CET.{{if .FallbackCurrencies}} For currencies the ECB does not publish ({{range $i, $c := .FallbackCurrencies}}{{if $i}}, {{end}}{{$c}}{{end}}), rates come from <a href="https://www.exchangerate-api.com/docs/free" target="_blank" rel="noopener">open.er-api.com</a>, updated daily.{{end}}</p>
+    </section>
 
     {{if .Failed}}
     <details>

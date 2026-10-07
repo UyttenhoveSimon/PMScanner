@@ -140,6 +140,14 @@ quote prices without VAT the country's standard rate (from [`tax.go`](tax.go))
 is added. Each price is labelled accordingly, and the page ends with a table
 of the tax rules in every country it covers.
 
+## Exchange rates
+
+Prices are ranked in euros, converted at the exchange rate of the day of each
+scan. Rates are the European Central Bank's daily euro reference rates; for
+currencies the ECB does not publish (e.g. RUB, AZN, KZT, RSD) they come from
+[open.er-api.com](https://www.exchangerate-api.com/docs/free). The page names
+the source of every currency it offers.
+
 ## How it works
 
 For each product page, PMScanner tries these sources in order and keeps the first price found:

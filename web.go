@@ -19,6 +19,7 @@ type server struct {
 	db       *store.Store
 	mu       sync.RWMutex
 	rates    fx.Rates
+	origins  fx.Origins
 	ratesAt  time.Time
 	scanning bool
 	lastRun  time.Time // last scan attempt, even if it could not be saved
@@ -106,24 +107,25 @@ func (s *server) rescan() {
 // ratesMaxAge is how long exchange rates are reused; they change once a day.
 const ratesMaxAge = 6 * time.Hour
 
-// currentRates returns cached exchange rates, refreshing them when stale.
-func (s *server) currentRates() fx.Rates {
+// currentRates returns cached exchange rates and their sources, refreshing
+// them when stale.
+func (s *server) currentRates() (fx.Rates, fx.Origins) {
 	s.mu.RLock()
-	rates, stale := s.rates, time.Since(s.ratesAt) > ratesMaxAge
+	rates, origins, stale := s.rates, s.origins, time.Since(s.ratesAt) > ratesMaxAge
 	s.mu.RUnlock()
 	if !stale {
-		return rates
+		return rates, origins
 	}
 	// Fetched outside the lock; concurrent requests may both fetch, which is harmless.
-	fresh, err := fx.FetchRates()
+	fresh, freshOrigins, err := fx.FetchRates()
 	if err != nil {
 		log.Printf("exchange rates: %v", err)
-		return rates
+		return rates, origins
 	}
 	s.mu.Lock()
-	s.rates, s.ratesAt = fresh, time.Now()
+	s.rates, s.origins, s.ratesAt = fresh, freshOrigins, time.Now()
 	s.mu.Unlock()
-	return fresh
+	return fresh, freshOrigins
 }
 
 func (s *server) setScanning(v bool) {
@@ -166,7 +168,8 @@ func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 	id, err := s.scanID(r)
 	var data pageData
 	if err == nil {
-		data, err = buildPage(s.db, id, serverLinks{}, s.currentRates())
+		rates, origins := s.currentRates()
+		data, err = buildPage(s.db, id, serverLinks{}, rates, origins)
 	}
 	switch {
 	case errors.Is(err, store.ErrNotFound) && !r.URL.Query().Has("scan"):

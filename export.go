@@ -43,7 +43,7 @@ func exportSite(dir string, db *store.Store) error {
 	if len(scans) == 0 {
 		return fmt.Errorf("no scan to export; run a scan first")
 	}
-	rates, err := fx.FetchRates()
+	rates, origins, err := fx.FetchRates()
 	if err != nil {
 		log.Printf("exchange rates: %v (the page will only offer EUR)", err)
 	}
@@ -55,7 +55,7 @@ func exportSite(dir string, db *store.Store) error {
 	}
 	for i, sc := range scans {
 		name := filepath.Join("scans", strconv.FormatInt(sc.ID, 10)+".html")
-		if err := writePage(dir, name, db, sc.ID, staticLinks{root: "../"}, rates); err != nil {
+		if err := writePage(dir, name, db, sc.ID, staticLinks{root: "../"}, rates, origins); err != nil {
 			return err
 		}
 		prices, err := pricesJSON(db, sc.ID)
@@ -66,7 +66,7 @@ func exportSite(dir string, db *store.Store) error {
 			return err
 		}
 		if i == 0 {
-			if err := writePage(dir, "index.html", db, sc.ID, staticLinks{}, rates); err != nil {
+			if err := writePage(dir, "index.html", db, sc.ID, staticLinks{}, rates, origins); err != nil {
 				return err
 			}
 			if err := writeJSONFile(filepath.Join(dir, "api", "prices.json"), prices); err != nil {
@@ -81,8 +81,8 @@ func exportSite(dir string, db *store.Store) error {
 	return nil
 }
 
-func writePage(dir, name string, db *store.Store, id int64, l links, rates fx.Rates) error {
-	data, err := buildPage(db, id, l, rates)
+func writePage(dir, name string, db *store.Store, id int64, l links, rates fx.Rates, origins fx.Origins) error {
+	data, err := buildPage(db, id, l, rates, origins)
 	if err != nil {
 		return fmt.Errorf("scan %d: %w", id, err)
 	}

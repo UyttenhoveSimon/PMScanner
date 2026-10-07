@@ -22,23 +22,38 @@ const (
 
 var client = &http.Client{Timeout: 15 * time.Second}
 
+// Rate sources, as shown to readers.
+const (
+	SourceECB      = "ECB"
+	SourceFallback = "open.er-api.com"
+)
+
+// Origins maps a currency code to the source of its rate.
+type Origins map[string]string
+
 // FetchRates returns the ECB rates, plus fallback rates for the currencies
-// the ECB does not cover. It fails only when neither source answers.
-func FetchRates() (Rates, error) {
+// the ECB does not cover, and where each rate came from. It fails only when
+// neither source answers.
+func FetchRates() (Rates, Origins, error) {
 	rates, ecbErr := FetchECB()
 	extra, fallbackErr := FetchFallback()
 	if ecbErr != nil && fallbackErr != nil {
-		return nil, errors.Join(ecbErr, fallbackErr)
+		return nil, nil, errors.Join(ecbErr, fallbackErr)
 	}
 	if rates == nil {
 		rates = Rates{}
 	}
+	origins := Origins{}
+	for cur := range rates {
+		origins[cur] = SourceECB
+	}
 	for cur, r := range extra {
 		if _, ok := rates[cur]; !ok && cur != "EUR" {
 			rates[cur] = r
+			origins[cur] = SourceFallback
 		}
 	}
-	return rates, nil
+	return rates, origins, nil
 }
 
 // Rates maps a currency code to its value of one euro, e.g. "GBP": 0.85.
