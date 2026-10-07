@@ -283,7 +283,6 @@ var products = []scraper.Product{
 	{Site: "ciode", Country: "ES", Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://ciode.es/producto/lingote-de-oro-1000-grs/"},
 	{Site: "ciode", Country: "ES", Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://ciode.es/producto/krugerrand-sudafrica-1-oz-oro-varios-a-os/"},
 	{Site: "ciode", Country: "ES", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://ciode.es/producto/maple-oro-50-canada-31-10-grs-varios-a-os-2/"},
-	{Site: "ciode", Country: "ES", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://ciode.es/producto/onza-plata-maple-leaf-2017-canada/"},
 
 	// Italy
 	{Site: "italpreziosi", Country: "IT", Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://shop.italpreziosi.it/investimento/lingotti/oro/lingotto-oro-1-kg/"},
