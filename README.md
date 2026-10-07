@@ -42,6 +42,20 @@ cd PMScanner
 go run .
 ```
 
+### Build a binary
+
+The web page is embedded, so the binary is self-contained. Without cgo it can
+be cross-compiled for any platform:
+
+```sh
+CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o pmscanner .
+./pmscanner -serve :8080
+
+# e.g. for a Linux server or a Raspberry Pi
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o pmscanner-linux-amd64 .
+GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o pmscanner-linux-arm64 .
+```
+
 ### Web page
 
 ```sh
