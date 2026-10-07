@@ -1206,6 +1206,78 @@ var products = []scraper.Product{
 	{Site: "zlatosrebro.hr", Country: "HR", RateGroup: gvs, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://www.zlatosrebro.hr/1kg-srebrna-poluga-argor-heraeus.html"},
 	{Site: "zlatosrebro.hr", Country: "HR", RateGroup: gvs, Description: "Platinum bar 1oz", WeightGrams: oz, URL: "https://www.zlatosrebro.hr/1-oz-platinbarren-diverse-hersteller.html"},
 	{Site: "zlatosrebro.hr", Country: "HR", RateGroup: gvs, Description: "Platinum coin 1oz Koala", WeightGrams: oz, URL: "https://www.zlatosrebro.hr/1-unca-platinasti-koala.html"},
+
+	// Silver bars, platinum, palladium and copper: Nordic and Eastern Europe
+	// Finland
+	{Site: "tavex.fi", Country: "FI", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://tavex.fi/hopea/1kg-valcambi-silver-bar/"},
+	{Site: "jalonom", Country: "FI", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.jalonom.com/en/shop/silver-bar-1kg-variable-manufacturer-1691"},
+	// Sweden
+	{Site: "tavex.se", Country: "SE", Description: "Silver bar 1kg Heraeus", WeightGrams: kg, URL: "https://tavex.se/silver/1kg-heraeus-silver-tacka/"},
+	// Denmark
+	{Site: "tavex.dk", Country: "DK", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://tavex.dk/solv/1kg-valcambi-solvbarre/"},
+	{Site: "vitusguld", Country: "DK", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://vitusguld.dk/produkt/1000-gr-soelvbarre-999-%e2%80%b0-valcambi-schweiz/"},
+	{Site: "vitusguld", Country: "DK", Description: "Platinum bar 1oz Credit Suisse", WeightGrams: oz, URL: "https://vitusguld.dk/produkt/1-oz-platinbarre-999-%e2%80%b0-311-gr-credit-suisse/"},
+	// Poland
+	{Site: "tavex.pl", Country: "PL", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://tavex.pl/platyna/platynowa-moneta-lisc-klonu-1-oz/"},
+	{Site: "tavex.pl", Country: "PL", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://tavex.pl/platyna/1-oz-platynowy-wiedenski-filharmonik/"},
+	{Site: "tavex.pl", Country: "PL", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://tavex.pl/platyna/platynowa-brytyjska-britannia-1-oz/"},
+	{Site: "tavex.pl", Country: "PL", Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, URL: "https://tavex.pl/platyna/1-oz-platynowy-australijski-kangur/"},
+	{Site: "mennicaskarbowa", Country: "PL", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.mennicaskarbowa.pl/srebrne-sztabki/3465-1000-g-1-kg-sztabka-srebra-wysylka-24-h.html"},
+	{Site: "mennicaskarbowa", Country: "PL", Description: "Platinum coin 1oz Eagle", WeightGrams: oz, URL: "https://www.mennicaskarbowa.pl/platyna-i-pallad/4490-platynowa-moneta-amerykanski-orzel-1-uncja-wysylka-24-h.html"},
+	{Site: "mennicaskarbowa", Country: "PL", Description: "Copper bar 1kg", WeightGrams: kg, URL: "https://www.mennicaskarbowa.pl/miedz/1540-sztabka-miedzi-1000-g-1kg-wysylka-24-h.html"},
+	{Site: "kupnozlota", Country: "PL", RateGroup: gvs, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, Sources: metaOnly, URL: "https://www.kupnozlota.pl/1kg-silberbarren-argor-heraeus.html"},
+	{Site: "kupnozlota", Country: "PL", RateGroup: gvs, Description: "Platinum bar 1oz", WeightGrams: oz, Sources: metaOnly, URL: "https://www.kupnozlota.pl/1-oz-platinbarren-diverse-hersteller.html"},
+	{Site: "kupnozlota", Country: "PL", RateGroup: gvs, Description: "Platinum coin 1oz Koala", WeightGrams: oz, Sources: metaOnly, URL: "https://www.kupnozlota.pl/1-uncja-platynowy-koala-rozne.html"},
+	// Czech Republic
+	{Site: "goldenhouse", Country: "CZ", Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://goldenhouse.cz/de/c/stribro-de/argor-heraeus-investment-silberbarren-1000-g"},
+	{Site: "goldenhouse", Country: "CZ", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://goldenhouse.cz/de/c/platina-a-palladium-1/wiener-philharmoniker-platinmunze-1-oz"},
+	{Site: "goldengate", Country: "CZ", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://eshop.goldengate.cz/products/stribrny-slitek-1-kg"},
+	{Site: "goldengate", Country: "CZ", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://eshop.goldengate.cz/products/platinovy-slitek-1-oz-valcambi"},
+	{Site: "auportal", Country: "CZ", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://www.auportal.cz/investicni-stribro-stribrny-slitek-1000g-valcambi-sa_z3677/"},
+	{Site: "bessergold", Country: "CZ", Description: "Silver bar 1kg Bessergold", WeightGrams: kg, URL: "https://www.bessergold.cz/cs/investicni-stribro/stribrne-slitky-cihly-prodej-praha/stribrne-slitky-1000g/bessergold-stribrny-slitek-1000-g.html"},
+	// Slovakia
+	{Site: "zlatypristav", Country: "SK", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, Sources: cssOnly, Selectors: []string{"span.product_price .woocommerce-Price-amount"}, URL: "https://zlatypristav.sk/obchod/platina-vco/valcambi-1-oz-platinum/"},
+	// Hungary
+	{Site: "tavex.hu", Country: "HU", VAT: scraper.VATMargin, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://tavex.hu/ezuest/1kg-argor-heraeus-ezusttomb-afa/"},
+	{Site: "aranykereskedes", Country: "HU", RateGroup: gvs, Description: "Silver bar 1kg Valcambi", WeightGrams: kg, Sources: metaOnly, URL: "https://aranykereskedes.hu/1kg-silberbarren-valcambi.html"},
+	{Site: "aranykereskedes", Country: "HU", RateGroup: gvs, Description: "Platinum bar 1oz (circulated)", WeightGrams: oz, Sources: metaOnly, URL: "https://aranykereskedes.hu/1-oz-platinbarren-diverse-hersteller.html"},
+	{Site: "aranykereskedes", Country: "HU", RateGroup: gvs, Description: "Platinum coin 1oz Koala", WeightGrams: oz, Sources: metaOnly, URL: "https://aranykereskedes.hu/1-uncia-koala-platina-erme.html"},
+	{Site: "aranypiac", Country: "HU", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.aranypiac.hu/Ezustrud-1000-gramm-kulonfele-good-delivery-gyarto"},
+	{Site: "aranypiac", Country: "HU", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://www.aranypiac.hu/Becsi-Filharmonikusok-PLATINA-1/1-uncia"},
+	// Romania
+	{Site: "avangardgold", Country: "RO", Description: "Silver bar 1kg Metalor", WeightGrams: kg, URL: "https://avangardgold.ro/products/lingou-argint-1-kg-metalor"},
+	{Site: "goldbars.ro", Country: "RO", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://goldbars.ro/catalog/lingou-argint-1kg-valcambi-suisse-999"},
+	{Site: "goldbars.ro", Country: "RO", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://goldbars.ro/catalog/lingou-platina-1oz-31-10g-valcambi-9995"},
+	{Site: "goldbars.ro", Country: "RO", Description: "Palladium bar 1oz Argor-Heraeus", WeightGrams: oz, URL: "https://goldbars.ro/catalog/lingou-paladiu-1oz-31-10g-argor-heraeus-9995"},
+	{Site: "aurom", Country: "RO", Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://www.aurominvestment.ro/produs/1000-g-lingou-de-argint-argor-heraeus/"},
+	// Bulgaria
+	{Site: "tavex.bg", Country: "BG", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://tavex.bg/en/silver/1kg-valcambi-silver-bar/"},
+	{Site: "mygold.bg", Country: "BG", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://mygold.bg/1-kg-srebrno-kyulche-valcambi-suisse"},
+	{Site: "zlatenrezerv", Country: "BG", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://www.zlatenrezerv.bg/rafinerii-i-monetni-dvorove/valcambi-bg/valcambi-1-uncziya-zlatno-kyulche-copy/"},
+	{Site: "topgold", Country: "BG", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://topgold.bg/product/1-uncziya-31-1-gr-platinena-moneta-vienska-filharmoniya-2025/"},
+	{Site: "topgold", Country: "BG", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://topgold.bg/product/1-uncziya-31-1-gr-platinena-moneta-kanadski-klenov-list-2025/"},
+	{Site: "topgold", Country: "BG", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://topgold.bg/product/1-uncziya-31-1-gr-platinena-moneta-britaniya/"},
+	// Estonia
+	{Site: "tavid", Country: "EE", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://tavid.ee/hobe/1kg-valcambi-hobeplaat/"},
+	{Site: "gvs.ee", Country: "EE", RateGroup: gvs, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://gvs.ee/1kg-silverbar-argor-heraeus.html"},
+	{Site: "gvs.ee", Country: "EE", RateGroup: gvs, Description: "Platinum bar 1oz", WeightGrams: oz, URL: "https://gvs.ee/1-oz-platinbarren-diverse-hersteller.html"},
+	{Site: "gvs.ee", Country: "EE", RateGroup: gvs, Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://gvs.ee/1-oz-platin-britannia.html"},
+	{Site: "eurex.ee", Country: "EE", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://eurex.ee/en/shop/1-kilo-silver-bar-valcambi-4002079"},
+	{Site: "tavast", Country: "EE", Description: "Silver bar 1kg UBS", WeightGrams: kg, Sources: cssOnly, Selectors: []string{"p.price .woocommerce-Price-amount"}, URL: "https://gold.tavast.eu/product/hobeplaat-ubs-1000g/"},
+	// Latvia
+	{Site: "tavex.lv", Country: "LV", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://tavex.lv/en/silver/1kg-valcambi-silver-bar/"},
+	// Lithuania
+	{Site: "tavex.lt", Country: "LT", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://tavex.lt/en/silver/1kg-valcambi-silver-bar/"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.eurodata.lt/1-kg-sidabro-luitas-atsitiktiniai-metai-atsitiktinio-dizaino-999"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://www.eurodata.lt/1-oz-31-10-g-platinos-luitas-valcambi-999-5-1563548999"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://www.eurodata.lt/1-oz-31-10-g-platinine-moneta-filharmonija-austrija-random-year"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://www.eurodata.lt/1-oz-31-10-g-platinine-moneta-klevo-lapas-kanada-mix-metai"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://www.eurodata.lt/platina-paladis/platinines-monetos/1-oz-31-10-g-platinine-moneta-britannia-didzioji-britanija-atsitiktiniai-metai"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, URL: "https://www.eurodata.lt/platina-paladis/platinines-monetos/1-oz-31-10-g-platinine-moneta-kengura-australija-atsitiktiniai-metai"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Palladium bar 1oz Valcambi", WeightGrams: oz, URL: "https://www.eurodata.lt/paladzio-luitai/1-oz-31-10-g-paladzio-luitas-valcambi-999-5"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Palladium coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://www.eurodata.lt/paladzio-monetos/1-oz-paladzio-moneta-klevo-lapas-kanada-mix-metai"},
+	{Site: "eurodata.lt", Country: "LT", Description: "Copper bar 1kg Germania Mint", WeightGrams: kg, URL: "https://www.eurodata.lt/1-kg-vario-luitas-germania-mint-999-9"},
+	{Site: "gerettigold", Country: "LT", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://gerettigold.lt/parduotuve/sidabras/1-kg-sidabro-luitas-valcambi/"},
 }
 
 var (
