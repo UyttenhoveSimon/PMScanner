@@ -2,10 +2,10 @@
 # Scans prices from this machine and publishes them to GitHub Pages.
 #
 # Some shops block GitHub's servers, so a scan run here reads more of them.
-# The scan is added to the published database (the `data` branch), then the
-# Pages workflow republishes the site without scanning again.
+# The scan is added to the published database (the `data` branch); pushing it
+# makes the Pages workflow republish the site without scanning again.
 #
-# Requires: go, git push access to the repository, and the GitHub CLI (gh).
+# Requires: go and git push access to the repository.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -30,7 +30,7 @@ echo "Scanning…"
 echo "Failures:"
 grep 'error:' "$work/scan.txt" || echo "none"
 
-echo "Saving the database to the data branch…"
+echo "Publishing the database to the data branch…"
 (
 	cd "$work"
 	git init -q -b data
@@ -39,6 +39,4 @@ echo "Saving the database to the data branch…"
 	git push -q -f "$remote" data
 )
 
-echo "Republishing the site…"
-gh workflow run pages.yml -f scan=false
-echo "Done. The site updates in a minute or two."
+echo "Done. GitHub republishes the site in a minute or two."

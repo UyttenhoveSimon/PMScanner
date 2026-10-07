@@ -106,8 +106,8 @@ the result instead, run:
 scripts/publish-local.sh
 ```
 
-It adds the scan to the published database on the `data` branch and asks the
-Pages workflow to republish the site without scanning again (requires `gh`).
+It adds the scan to the published database on the `data` branch; pushing it
+makes the Pages workflow republish the site without scanning again.
 
 ### Browser mode
 

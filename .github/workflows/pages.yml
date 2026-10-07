@@ -14,7 +14,10 @@ on:
         type: boolean
         default: true
   push:
-    branches: [main] # republish page changes without scanning
+    # Republish without scanning when the page changes (main) or when a scan
+    # made elsewhere is added to the database (data). The workflow's own
+    # pushes to data use GITHUB_TOKEN, which does not trigger workflows.
+    branches: [main, data]
 
 permissions:
   contents: write # push the database to the data branch
@@ -33,6 +36,8 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main # the data branch only holds the database
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
