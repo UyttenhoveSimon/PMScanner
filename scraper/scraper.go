@@ -40,6 +40,7 @@ var DefaultSources = []Source{CSS, JSONLD, Microdata, Meta}
 // Product is a product page to scrape.
 type Product struct {
 	Site        string
+	Country     string // ISO 3166-1 alpha-2 code of the shop's country
 	Description string
 	URL         string
 	WeightGrams decimal.Decimal
