@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PM Scanner</title>
+{{if .Scanning}}<meta http-equiv="refresh" content="20">{{end}}
+<style>
+  :root {
+    --bg: #fafaf7; --fg: #1c1c1a; --muted: #6b6b66; --line: #e4e3dc;
+    --card: #ffffff; --accent: #b8860b; --best: #f5ecd2; --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151513; --fg: #ecebe6; --muted: #9a9991; --line: #2c2c28;
+      --card: #1d1d1a; --accent: #e0b44c; --best: #3a321c; --err: #f2867e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  h1 span { color: var(--accent); }
+  .meta { color: var(--muted); font-size: 13px; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0 8px; }
+  nav a { padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+    color: var(--fg); text-decoration: none; font-size: 13px; background: var(--card); }
+  nav a:hover { border-color: var(--accent); }
+  section { margin-top: 28px; }
+  h2 { font-size: 16px; margin: 0 0 8px; }
+  .table { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  th { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  td.num, th.num { text-align: right; }
+  td.desc { white-space: normal; color: var(--muted); }
+  tr.best td { background: var(--best); }
+  tr.best td:first-child::after { content: "cheapest"; margin-left: 8px; font-size: 11px;
+    color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  a { color: inherit; }
+  td a { text-decoration: none; border-bottom: 1px dotted var(--muted); }
+  .err { color: var(--err); white-space: normal; }
+  details { margin-top: 28px; color: var(--muted); }
+  .empty { padding: 40px 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>PM <span>Scanner</span></h1>
+    <div class="meta">
+      {{if .Scanned}}Updated {{.Scanned}}{{end}}{{if .Scanning}} · scanning…{{end}}
+      · <a href="/api/prices">JSON</a>
+    </div>
+  </header>
+
+  {{if not .Scanned}}
+    <p class="empty">First scan in progress, this page refreshes automatically…</p>
+  {{else}}
+    <nav>
+      {{range .Groups}}{{if .Rows}}<a href="#{{.Name}}">{{.Name}}</a>{{end}}{{end}}
+    </nav>
+    {{range .Groups}}{{if .Rows}}
+    <section id="{{.Name}}">
+      <h2>{{.Name}}</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Shop</th><th>Product</th><th class="num">Price</th><th class="num">Per gram</th></tr></thead>
+          <tbody>
+          {{range .Rows}}
+            <tr{{if .Best}} class="best"{{end}}>
+              <td><a href="{{.URL}}" target="_blank" rel="noopener">{{.Site}}</a></td>
+              <td class="desc">{{.Description}}</td>
+              <td class="num">{{.Price}} {{.Currency}}</td>
+              <td class="num">{{.PerGram}}</td>
+            </tr>
+          {{end}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {{end}}{{end}}
+
+    {{if .Failed}}
+    <details>
+      <summary>{{len .Failed}} product(s) could not be read</summary>
+      <div class="table">
+        <table>
+          {{range .Failed}}
+          <tr><td><a href="{{.URL}}" target="_blank" rel="noopener">{{.Site}}</a></td><td class="desc">{{.Description}}</td><td class="err">{{.Error}}</td></tr>
+          {{end}}
+        </table>
+      </div>
+    </details>
+    {{end}}
+  {{end}}
+</main>
+</body>
+</html>
