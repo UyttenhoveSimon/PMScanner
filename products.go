@@ -1090,6 +1090,18 @@ var products = []scraper.Product{
 	{Site: "achat-or-et-argent", Country: "FR", Description: "Palladium bar 1oz", WeightGrams: oz, URL: "https://www.achat-or-et-argent.fr/autres-metaux/lingot-1-once-palladium/12430"},
 	{Site: "maison-joubert", Country: "FR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://maison-joubert.fr/catalogue-metaux/argent-lingot-1kg/"},
 	{Site: "bdor", Country: "FR", Description: "Silver bar 1kg Malta", WeightGrams: kg, URL: "https://www.bdor.fr/achat-or-en-ligne/lingot-argent-1-kg-malta-sans-tva"},
+
+	// Rare platinum-group metals
+	// Rhodium
+	{Site: "esg", Country: "DE", Description: "Rhodium bar 1oz Degussa", WeightGrams: oz, URL: "https://www.edelmetall-handel.de/rhodiumbarren-1oz-degussa-999-rh-gepraegt-10203499"},
+	{Site: "auragentum", Country: "DE", Description: "Rhodium bar 1oz", WeightGrams: oz, URL: "https://auragentum.de/products/1-unze-rhodiumbarren"},
+	{Site: "smart-elements", Country: "AT", Description: "Rhodium bead 20g", WeightGrams: decimal.RequireFromString("20"), URL: "https://smart-elements.com/shop/rhodium-metal-bead-20g/"},
+	// Iridium
+	{Site: "auragentum", Country: "DE", Description: "Iridium bar 1oz", WeightGrams: oz, URL: "https://auragentum.de/products/1-unze-iridiumbarren"},
+	// Ruthenium
+	{Site: "auragentum", Country: "DE", Description: "Ruthenium bar 1oz", WeightGrams: oz, URL: "https://auragentum.de/products/1-unze-rutheniumbarren"},
+	// Osmium
+	{Site: "smart-elements", Country: "AT", Description: "Osmium bead 20g", WeightGrams: decimal.RequireFromString("20"), URL: "https://smart-elements.com/shop/osmium-bead-99-95-20g/"},
 }
 
 var (

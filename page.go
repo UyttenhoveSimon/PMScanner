@@ -38,6 +38,10 @@ var categories = []string{
 	"Palladium bar 1oz",
 	"Palladium coin 1oz",
 	"Copper bar 1kg",
+	"Rhodium",
+	"Iridium",
+	"Ruthenium",
+	"Osmium",
 }
 
 const otherCategory = "Other"
