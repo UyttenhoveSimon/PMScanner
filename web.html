@@ -95,8 +95,7 @@
     <div class="toolbar">
       <label>Metal
         <select id="metal">
-          <option value="">All metals</option>
-          {{range .Metals}}<option value="{{.}}">{{.}}</option>{{end}}
+          {{range .Metals}}<option value="{{.}}"{{if eq . "Gold"}} selected{{end}}>{{.}}</option>{{end}}
         </select>
       </label>
       <label>Type
@@ -242,7 +241,7 @@
   if (metal && type && country) {
     const filter = () => {
       // Only offer the types of the chosen metal.
-      for (const o of type.options) o.hidden = o.value !== "" && metal.value !== "" && o.dataset.metal !== metal.value;
+      for (const o of type.options) o.hidden = o.value !== "" && o.dataset.metal !== metal.value;
       if (type.selectedOptions[0]?.hidden) { type.value = ""; store.set("type", ""); }
       document.querySelectorAll("section[data-type]").forEach((sec) => {
         let first = true, best = null;
@@ -255,12 +254,10 @@
           if (!best || perGram < best.perGram) best = { tr, perGram };
         });
         if (best) best.tr.classList.add("best");
-        sec.hidden = (metal.value !== "" && sec.dataset.metal !== metal.value) ||
+        sec.hidden = sec.dataset.metal !== metal.value ||
           (type.value !== "" && sec.dataset.type !== type.value) || first;
       });
     };
-    // Gold first: other metals are one menu choice away.
-    if (store.get("metal") === null && [...metal.options].some((o) => o.value === "Gold")) metal.value = "Gold";
     for (const [el, key] of [[metal, "metal"], [type, "type"], [country, "country"]]) {
       const saved = store.get(key);
       if (saved !== null && [...el.options].some((o) => o.value === saved)) el.value = saved;
