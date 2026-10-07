@@ -30,7 +30,7 @@ var products = []scraper.Product{
 		URL: "https://or.fr/achat/or/pieces/krugerrand-or-1-once-2026-south-african-mint-498"},
 	{Site: "or.fr", Country: "FR", Description: "Gold Maple Leaf 1oz", WeightGrams: oz,
 		URL: "https://or.fr/achat/or/pieces/maple-leaf-or-1-once-2026-royal-canadian-mint-470"},
-	{Site: "or.fr", Country: "FR", VAT: scraper.VATExcluded, Description: "Silver Maple Leaf 1oz (tube of 25)", WeightGrams: tube,
+	{Site: "or.fr", Country: "FR", VAT: scraper.VATFree, Description: "Silver Maple Leaf 1oz (tube of 25)", WeightGrams: tube,
 		URL: "https://or.fr/achat/argent/pieces/maple-leaf-argent-1-once-2026-tube-25-pieces-royal-canadian-mint-510"},
 
 	{Site: "suissegold", Country: "CH", Description: "Gold bar 1kg", WeightGrams: kg,
@@ -1077,8 +1077,8 @@ var products = []scraper.Product{
 	{Site: "hollandgold", Country: "NL", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://www.hollandgold.nl/philharmoniker-1-troy-ounce-platina-munt.html"},
 	{Site: "silvermountain", Country: "NL", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://www.thesilvermountain.nl/en/1-troy-ounce-valcambi-platinum-bar"},
 	// France
-	{Site: "or.fr", Country: "FR", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://or.fr/achat/argent/lingots/lingot-d-argent-1-kilogramme-valcambi-299"},
-	{Site: "or.fr", Country: "FR", VAT: scraper.VATExcluded, Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://or.fr/achat/platine/lingots/1-once-valcambi-195"},
+	{Site: "or.fr", Country: "FR", VAT: scraper.VATFree, Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://or.fr/achat/argent/lingots/lingot-d-argent-1-kilogramme-valcambi-299"},
+	{Site: "or.fr", Country: "FR", VAT: scraper.VATFree, Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://or.fr/achat/platine/lingots/1-once-valcambi-195"},
 	{Site: "achat-or-et-argent", Country: "FR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.achat-or-et-argent.fr/argent/lingot-1-kilo-argent/3604"},
 	{Site: "oretchange", Country: "FR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.oretchange.com/lingots-et-lingotins-argent/230-lingot-1-kilo-d-argent.html"},
 	{Site: "or-investissement", Country: "FR", Description: "Silver bar 1kg Malta", WeightGrams: kg, URL: "https://or-investissement.fr/achat-lingot-argent-investissement/1531-lingot-argent-malte-1-kilo.html"},
@@ -1324,6 +1324,10 @@ var products = []scraper.Product{
 	{Site: "agakulche", Country: "TR", Description: "Gold bar 1kg Valcambi", WeightGrams: decimal.RequireFromString("995"), URL: "https://www.agakulche.com/agakulche-valcambi-1-kg-24-ayar-995-kulce-altin"},
 	{Site: "agakulche", Country: "TR", Description: "Silver bar 1kg Nadir", WeightGrams: kg, URL: "https://www.agakulche.com/nadir-1000-gram-sertifikali-kulce-gumus-9999"},
 	{Site: "agakulche", Country: "TR", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.agakulche.com/agakulche-maple-leaf-2026-gumus-sikke-coin"},
+
+	// Shops that quote these without VAT; it is added when comparing.
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://ciode.es/producto/onza-plata-maple-leaf-2017-canada/"},
+	{Site: "tavast", Country: "EE", VAT: scraper.VATExcluded, Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://gold.tavast.eu/product/hobemunt-maple-leaf-1-oz-2016/"},
 }
 
 var (
