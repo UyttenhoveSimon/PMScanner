@@ -9,6 +9,8 @@
 PMScanner scrapes gold and silver product pages from many dealers at once and tells
 you who sells cheapest, either as a terminal table or as a small self-hosted web page.
 
+![PMScanner web page: 1 kg gold bars from European dealers ranked by euros per gram, with type, country and currency filters](docs/screenshot.png)
+
 ```
 SITE           PRODUCT                PRICE          PER GRAM  URL
 or.fr          Gold bar 1kg Valcambi  119856.23 EUR  119.86    https://or.fr/achat/or/lingots/...
