@@ -18,7 +18,7 @@ import (
 
 func main() {
 	serve := flag.String("serve", "", "serve a web page on this address (e.g. :8080) instead of printing a table")
-	refresh := flag.Duration("refresh", 30*time.Minute, "how often the web page rescans prices")
+	refresh := flag.Duration("refresh", 24*time.Hour, "how often the web server rescans prices (0 disables automatic scans)")
 	dbPath := flag.String("db", "pmscanner.db", "SQLite database where every scan is saved")
 	flag.Parse()
 

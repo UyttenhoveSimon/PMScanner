@@ -48,6 +48,7 @@ type server struct {
 	db       *store.Store
 	mu       sync.RWMutex
 	scanning bool
+	lastRun  time.Time // last scan attempt, even if it could not be saved
 }
 
 func runServer(addr string, refresh time.Duration, db *store.Store) error {
@@ -56,18 +57,51 @@ func runServer(addr string, refresh time.Duration, db *store.Store) error {
 		return err
 	}
 	s := &server{db: db}
-	go func() {
-		for {
-			s.rescan()
-			time.Sleep(refresh)
-		}
-	}()
+	if refresh > 0 {
+		go s.scanEvery(refresh)
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.handlePage)
 	mux.HandleFunc("GET /api/prices", s.handlePrices)
 	mux.HandleFunc("GET /api/scans", s.handleScans)
-	log.Printf("serving on http://%s (rescan every %s)", ln.Addr(), refresh)
+	if refresh > 0 {
+		log.Printf("serving on http://%s (rescan every %s)", ln.Addr(), refresh)
+	} else {
+		log.Printf("serving on http://%s (automatic rescans off)", ln.Addr())
+	}
 	return http.Serve(ln, mux)
+}
+
+// scanEvery rescans at the given interval, counting from the latest saved
+// scan so that restarting the server does not trigger a needless scan.
+func (s *server) scanEvery(interval time.Duration) {
+	for {
+		if wait := interval - s.sinceLastScan(); wait > 0 {
+			log.Printf("next scan in %s", wait.Round(time.Minute))
+			time.Sleep(wait)
+			continue
+		}
+		s.rescan()
+	}
+}
+
+// sinceLastScan returns how long ago the latest scan ran, or a very long
+// time when there is none.
+func (s *server) sinceLastScan() time.Duration {
+	s.mu.RLock()
+	last := s.lastRun
+	s.mu.RUnlock()
+	scans, err := s.db.Scans(1)
+	if err != nil {
+		log.Printf("read last scan: %v", err)
+	}
+	if len(scans) > 0 && scans[0].At.After(last) {
+		last = scans[0].At
+	}
+	if last.IsZero() {
+		return 1<<63 - 1
+	}
+	return time.Since(last)
 }
 
 func (s *server) rescan() {
@@ -75,6 +109,9 @@ func (s *server) rescan() {
 	defer s.setScanning(false)
 
 	start := time.Now()
+	s.mu.Lock()
+	s.lastRun = start
+	s.mu.Unlock()
 	entries := scan()
 	log.Printf("scanned %d products in %s, %d failed", len(entries), time.Since(start).Round(time.Second), failures(entries))
 	if _, err := s.db.Save(start, toPrices(entries)); err != nil {
