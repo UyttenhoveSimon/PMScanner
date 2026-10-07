@@ -129,6 +129,16 @@ pure gold. If the price doesn't come out right, these options help:
 | `Selectors` | The shop has no structured data; give CSS selectors for the price element  |
 | `Cookies`   | The shop needs a cookie, e.g. to show prices in EUR                        |
 | `Browser`   | The shop blocks plain HTTP clients with a JavaScript challenge            |
+| `VAT`       | The price isn't the default for its metal: `VATMargin`, `VATExcluded` (VAT is added when comparing) or `VATFree` |
+| `Currency`  | The page shows prices without a currency                                  |
+
+## Taxes
+
+Prices per gram compare what you actually pay. Investment gold is VAT exempt in
+the EU, the UK and Switzerland; other metals include VAT, and for shops that
+quote prices without VAT the country's standard rate (from [`tax.go`](tax.go))
+is added. Each price is labelled accordingly, and the page ends with a table
+of the tax rules in every country it covers.
 
 ## How it works
 

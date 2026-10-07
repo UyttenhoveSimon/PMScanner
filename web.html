@@ -38,6 +38,8 @@
   td.country-name { color: var(--muted); }
   .vat { display: block; font-size: 11px; color: var(--muted); }
   .vat-excluded { color: var(--err); }
+  .taxes td { white-space: normal; vertical-align: top; }
+  .taxes td.country-name { white-space: nowrap; color: var(--fg); }
   .note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
   .to-top { position: fixed; right: 16px; bottom: 16px; width: 40px; height: 40px; border-radius: 50%;
     border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 18px;
@@ -111,7 +113,7 @@
         </select>
       </label>
     </div>
-    <p class="note">Investment gold is VAT exempt in the EU, the UK and Switzerland. Other metals are shown as the shop sells them: incl. VAT, with VAT on the dealer's margin only (margin VAT), or excl. VAT (e.g. kept in a vault).</p>
+    <p class="note">Prices per gram are what you pay: investment gold is VAT exempt, other metals include VAT (on the full price, or on the dealer's margin only), and VAT is added for shops that quote without it. Metal kept in a vault can be VAT-free. See <a href="#taxes">taxes by country</a>.</p>
     {{range .Groups}}{{if .Rows}}
     <section id="{{.Name}}" data-type="{{.Name}}" data-metal="{{.Metal}}">
       <h2>{{.Name}}</h2>
@@ -133,6 +135,23 @@
       </div>
     </section>
     {{end}}{{end}}
+
+    {{if .Taxes}}
+    <section id="taxes" class="taxes">
+      <h2>Taxes by country</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Country</th><th class="num">VAT</th><th>Investment gold</th><th>Silver, platinum, palladium, copper</th></tr></thead>
+          <tbody>
+          {{range .Taxes}}
+            <tr><td class="country-name" data-code="{{.Country}}">{{.Country}}</td><td class="num">{{.VAT}}</td><td>{{.Gold}}</td><td>{{.Others}}</td></tr>
+          {{end}}
+          </tbody>
+        </table>
+      </div>
+      <p class="note">In the EU, investment gold is VAT exempt: bars of at least 99.5% purity and coins of at least 90% minted after 1800. Under the margin scheme, VAT is charged on the dealer's margin only and is included in the price. Standard rates as of 2026, for information only; check with the dealer or a tax adviser before buying.</p>
+    </section>
+    {{end}}
 
     {{if .Failed}}
     <details>
@@ -195,6 +214,13 @@
     const code = el.dataset.code || el.value;
     if (names && code) el.textContent = names.of(code);
   });
+  // Sort the tax table by those names too.
+  const taxBody = document.querySelector("#taxes tbody");
+  if (taxBody) {
+    const collator = new Intl.Collator(navigator.language);
+    [...taxBody.rows].sort((a, b) => collator.compare(a.cells[0].textContent, b.cells[0].textContent))
+      .forEach((r) => taxBody.appendChild(r));
+  }
   // Sort the country menu by those names, keeping "All countries" first.
   const countryMenu = document.getElementById("country");
   if (countryMenu) {

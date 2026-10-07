@@ -90,6 +90,20 @@ var vatLabels = map[scraper.VAT]string{
 	scraper.VATIncluded: "incl. VAT",
 	scraper.VATMargin:   "margin VAT",
 	scraper.VATExcluded: "excl. VAT",
+	scraper.VATFree:     "VAT-free (vault)",
+}
+
+// vatLabel describes a price's VAT, saying how much VAT the price per gram
+// adds when the shop quotes it without.
+func vatLabel(vat scraper.VAT, country string) string {
+	if t, ok := taxes[country]; ok && vat == scraper.VATExcluded {
+		return "excl. VAT, +" + t.VAT.String() + "% added per gram"
+	}
+	return vatLabels[vat]
+}
+
+type taxRow struct {
+	Country, VAT, Gold, Others string
 }
 
 // savedVAT returns a saved price's VAT, working it out for scans saved
@@ -141,6 +155,7 @@ type pageData struct {
 	Currencies []string
 	Countries  []string
 	Metals     []string // in category order
+	Taxes      []taxRow // for the countries on the page
 	Failed     []row
 	Scanned    string
 	Scanning   bool
@@ -197,7 +212,7 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 		}
 		rw.Price, rw.PerGram, rw.Currency = p.Price.StringFixed(2), p.EURPerGram.StringFixed(2), p.Currency
 		vat := savedVAT(p)
-		rw.VAT, rw.VATLabel = string(vat), vatLabels[vat]
+		rw.VAT, rw.VATLabel = string(vat), vatLabel(vat, country)
 		if country != "" {
 			countries[country] = true
 		}
@@ -217,6 +232,11 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 		}
 	}
 	slices.Sort(data.Countries)
+	for _, c := range data.Countries {
+		if t, ok := taxes[c]; ok {
+			data.Taxes = append(data.Taxes, taxRow{Country: c, VAT: t.VAT.String() + "%", Gold: t.Gold, Others: t.Others})
+		}
+	}
 	return data, nil
 }
 

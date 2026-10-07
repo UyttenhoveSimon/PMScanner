@@ -72,7 +72,8 @@ const (
 	VATExempt   VAT = "exempt"   // investment gold
 	VATIncluded VAT = "included" // VAT is in the price
 	VATMargin   VAT = "margin"   // margin scheme: VAT on the dealer's margin, in the price
-	VATExcluded VAT = "excluded" // VAT is not in the price (e.g. vault storage)
+	VATExcluded VAT = "excluded" // VAT is not in the price but due on purchase
+	VATFree     VAT = "free"     // no VAT is due, e.g. metal kept in a vault
 )
 
 // Result is the outcome of scraping one Product.

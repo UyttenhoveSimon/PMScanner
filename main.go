@@ -80,7 +80,8 @@ func scan() []entry {
 			case err != nil:
 				e.Err = err
 			default:
-				e.EURPerGram = eur
+				// Compare prices as paid: add VAT to prices quoted without it.
+				e.EURPerGram, _ = withVAT(eur, vatOf(r.Product), r.Country)
 			}
 		}
 		entries[i] = e
