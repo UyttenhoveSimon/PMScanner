@@ -36,6 +36,12 @@ var categories = []string{
 
 const otherCategory = "Other"
 
+// metalOf returns a category's metal, its first word ("Gold bar 1kg" → "Gold").
+func metalOf(category string) string {
+	metal, _, _ := strings.Cut(category, " ")
+	return metal
+}
+
 func categoryOf(description string) string {
 	for _, c := range categories {
 		if strings.HasPrefix(description, c) {
@@ -73,8 +79,9 @@ type row struct {
 }
 
 type group struct {
-	Name string
-	Rows []row
+	Name  string
+	Metal string
+	Rows  []row
 }
 
 type scanOption struct {
@@ -88,6 +95,7 @@ type pageData struct {
 	Rates      map[string]float64 // units per euro, for switching currency in the page
 	Currencies []string
 	Countries  []string
+	Metals     []string // in category order
 	Failed     []row
 	Scanned    string
 	Scanning   bool
@@ -124,7 +132,7 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 
 	byName := map[string]*group{}
 	for _, name := range append(categories, otherCategory) {
-		data.Groups = append(data.Groups, group{Name: name})
+		data.Groups = append(data.Groups, group{Name: name, Metal: metalOf(name)})
 	}
 	for i := range data.Groups {
 		byName[data.Groups[i].Name] = &data.Groups[i]
@@ -155,6 +163,11 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 	}
 	for c := range countries {
 		data.Countries = append(data.Countries, c)
+	}
+	for _, g := range data.Groups {
+		if len(g.Rows) > 0 && !slices.Contains(data.Metals, g.Metal) {
+			data.Metals = append(data.Metals, g.Metal)
+		}
 	}
 	slices.Sort(data.Countries)
 	return data, nil

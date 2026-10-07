@@ -84,10 +84,16 @@
     <p class="empty">First scan in progress, this page refreshes automatically…</p>
   {{else}}
     <div class="toolbar">
+      <label>Metal
+        <select id="metal">
+          <option value="">All metals</option>
+          {{range .Metals}}<option value="{{.}}">{{.}}</option>{{end}}
+        </select>
+      </label>
       <label>Type
         <select id="type">
           <option value="">All types</option>
-          {{range .Groups}}{{if .Rows}}<option value="{{.Name}}">{{.Name}}</option>{{end}}{{end}}
+          {{range .Groups}}{{if .Rows}}<option value="{{.Name}}" data-metal="{{.Metal}}">{{.Name}}</option>{{end}}{{end}}
         </select>
       </label>
       <label>Country
@@ -103,7 +109,7 @@
       </label>
     </div>
     {{range .Groups}}{{if .Rows}}
-    <section id="{{.Name}}" data-type="{{.Name}}">
+    <section id="{{.Name}}" data-type="{{.Name}}" data-metal="{{.Metal}}">
       <h2>{{.Name}}</h2>
       <div class="table">
         <table>
@@ -186,11 +192,15 @@
     if (names && code) el.textContent = names.of(code);
   });
 
-  // Type and country filters; the cheapest badge follows the visible rows.
+  // Metal, type and country filters; the cheapest badge follows the visible rows.
+  const metal = document.getElementById("metal");
   const type = document.getElementById("type");
   const country = document.getElementById("country");
-  if (type && country) {
+  if (metal && type && country) {
     const filter = () => {
+      // Only offer the types of the chosen metal.
+      for (const o of type.options) o.hidden = o.value !== "" && metal.value !== "" && o.dataset.metal !== metal.value;
+      if (type.selectedOptions[0]?.hidden) { type.value = ""; store.set("type", ""); }
       document.querySelectorAll("section[data-type]").forEach((sec) => {
         let first = true;
         sec.querySelectorAll("tbody tr").forEach((tr) => {
@@ -198,10 +208,11 @@
           tr.classList.toggle("best", !tr.hidden && first);
           if (!tr.hidden) first = false;
         });
-        sec.hidden = (type.value !== "" && sec.dataset.type !== type.value) || first;
+        sec.hidden = (metal.value !== "" && sec.dataset.metal !== metal.value) ||
+          (type.value !== "" && sec.dataset.type !== type.value) || first;
       });
     };
-    for (const [el, key] of [[type, "type"], [country, "country"]]) {
+    for (const [el, key] of [[metal, "metal"], [type, "type"], [country, "country"]]) {
       const saved = store.get(key);
       if (saved !== null && [...el.options].some((o) => o.value === saved)) el.value = saved;
       el.addEventListener("change", () => { store.set(key, el.value); filter(); });
