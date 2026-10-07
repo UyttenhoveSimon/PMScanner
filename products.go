@@ -1054,6 +1054,42 @@ var products = []scraper.Product{
 	{Site: "zoloto-md", Country: "RU", Description: "Platinum coin 1oz Eagle", WeightGrams: oz, Sources: cssOnly, Selectors: zolotoMD, Currency: "RUB", URL: "https://zoloto-md.ru/bullion-coins/i-inostrannyye/platinovaya-moneta-ssha-statuya-svobodyi,-31.1-g-chistoj-platinyi-proba-0.9995"},
 	// Azerbaijan
 	{Site: "azergold", Country: "AZ", Description: "Silver bar 1kg", WeightGrams: kg, Sources: cssOnly, Selectors: []string{"p.product-price"}, URL: "https://www.azergold.gift/mehsul/64"},
+
+	// Silver bars, platinum and palladium: Benelux and France
+	// Belgium
+	{Site: "orobel", Country: "BE", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.orobel.biz/produit/acheter-lingot-argent-1-kilo-en-ligne-orobel"},
+	{Site: "goudwisselkantoor", Country: "BE", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.shop-goudwisselkantoor.be/zilver-kopen/Staven/zilverstaaf-diverse-producenten-1000-gram"},
+	{Site: "goudwisselkantoor", Country: "BE", Description: "Platinum coin 1oz (various)", WeightGrams: oz, URL: "https://www.shop-goudwisselkantoor.be/platina-kopen/munten/platinamunt-1-oz-diverse-jaarland"},
+	{Site: "goldsilver.be", Country: "BE", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://goldsilver.be/en/kilo/15-silver-bar-1-kilo.html"},
+	{Site: "goldsilver.be", Country: "BE", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://goldsilver.be/en/platinum/1272-1-oz-platinium-platinum-maple-leaf-50-5.html"},
+	{Site: "goldsilver.be", Country: "BE", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://goldsilver.be/en/platinum/1778-1-oz-platinium-platinum-britannia-100-5.html"},
+	{Site: "goldsilver.be", Country: "BE", Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, URL: "https://goldsilver.be/en/platinum/2329-australia-1-oz-platinum-kangaroo-100-bu-2025-5.html"},
+	{Site: "goudwisselkantoor", Country: "BE", Description: "Platinum bar 1oz", WeightGrams: oz, URL: "https://www.shop-goudwisselkantoor.be/platina-kopen/staven/platinastaaf-1-oz-diverse-producenten"},
+	{Site: "goudwisselkantoor", Country: "BE", Description: "Palladium coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://www.shop-goudwisselkantoor.be/palladium-kopen/munten/palladium-maple-leaf-1-oz-divers-jaar"},
+	{Site: "goldsilver.be", Country: "BE", Description: "Palladium coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://goldsilver.be/en/platinum/244-1-oz-palladium-maple-leaf-50.html"},
+	// Netherlands
+	{Site: "hollandgold", Country: "NL", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.hollandgold.nl/1-kilogram-zilver-baar-lbma-gecertificeerd.html"},
+	{Site: "hollandgold", Country: "NL", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://www.hollandgold.nl/1-troy-ounce-platina-maple-leaf.html"},
+	{Site: "hollandgold", Country: "NL", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://www.hollandgold.nl/platina-queens-beast-lion.html"},
+	{Site: "hollandgold", Country: "NL", Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, URL: "https://www.hollandgold.nl/1-troy-ounce-platina-kangaroo-munt-2020.html"},
+	{Site: "silvermountain", Country: "NL", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.thesilvermountain.nl/en/1-kilo-silver-bar"},
+	{Site: "silvermountain", Country: "NL", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://www.thesilvermountain.nl/en/1-troy-ounce-platinum-coin-maple-leaf"},
+	{Site: "silvermountain", Country: "NL", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://www.thesilvermountain.nl/en/1-troy-ounce-platinum-coin-britannia"},
+	{Site: "silvermountain", Country: "NL", Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, URL: "https://www.thesilvermountain.nl/en/1-troy-ounce-platinum-kangaroo-coin"},
+	{Site: "hollandgold", Country: "NL", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://www.hollandgold.nl/philharmoniker-1-troy-ounce-platina-munt.html"},
+	{Site: "silvermountain", Country: "NL", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://www.thesilvermountain.nl/en/1-troy-ounce-valcambi-platinum-bar"},
+	// France
+	{Site: "or.fr", Country: "FR", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://or.fr/achat/argent/lingots/lingot-d-argent-1-kilogramme-valcambi-299"},
+	{Site: "or.fr", Country: "FR", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://or.fr/achat/platine/lingots/1-once-valcambi-195"},
+	{Site: "achat-or-et-argent", Country: "FR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.achat-or-et-argent.fr/argent/lingot-1-kilo-argent/3604"},
+	{Site: "oretchange", Country: "FR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.oretchange.com/lingots-et-lingotins-argent/230-lingot-1-kilo-d-argent.html"},
+	{Site: "or-investissement", Country: "FR", Description: "Silver bar 1kg Malta", WeightGrams: kg, URL: "https://or-investissement.fr/achat-lingot-argent-investissement/1531-lingot-argent-malte-1-kilo.html"},
+	{Site: "achat-or-et-argent", Country: "FR", Description: "Platinum bar 1oz", WeightGrams: oz, URL: "https://www.achat-or-et-argent.fr/autres-metaux/lingotin-1-once-platine/4832"},
+	{Site: "achat-or-et-argent", Country: "FR", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://www.achat-or-et-argent.fr/autres-metaux/britannia-1-once-platine/4918"},
+	{Site: "achat-or-et-argent", Country: "FR", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://www.achat-or-et-argent.fr/autres-metaux/philharmonique-de-vienne-1-oz-platine/23518"},
+	{Site: "achat-or-et-argent", Country: "FR", Description: "Palladium bar 1oz", WeightGrams: oz, URL: "https://www.achat-or-et-argent.fr/autres-metaux/lingot-1-once-palladium/12430"},
+	{Site: "maison-joubert", Country: "FR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://maison-joubert.fr/catalogue-metaux/argent-lingot-1kg/"},
+	{Site: "bdor", Country: "FR", Description: "Silver bar 1kg Malta", WeightGrams: kg, URL: "https://www.bdor.fr/achat-or-en-ligne/lingot-argent-1-kg-malta-sans-tva"},
 }
 
 var (
