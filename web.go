@@ -9,8 +9,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"pmscanner/scraper"
 )
 
 //go:embed web.html
@@ -40,7 +38,7 @@ func categoryOf(description string) string {
 // server keeps the latest scan and refreshes it in the background.
 type server struct {
 	mu       sync.RWMutex
-	results  []scraper.Result
+	results  []entry
 	scanned  time.Time
 	scanning bool
 }
@@ -115,7 +113,7 @@ func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 			data.Failed = append(data.Failed, rw)
 			continue
 		}
-		rw.Price, rw.PerGram, rw.Currency = res.Price.StringFixed(2), res.PricePerGram().StringFixed(2), res.Currency
+		rw.Price, rw.PerGram, rw.Currency = res.Price.StringFixed(2), res.EURPerGram.StringFixed(2), res.Currency
 		g := byName[categoryOf(res.Description)]
 		rw.Best = len(g.Rows) == 0
 		g.Rows = append(g.Rows, rw)
@@ -139,7 +137,7 @@ func (s *server) handleJSON(w http.ResponseWriter, r *http.Request) {
 		URL         string  `json:"url"`
 		Price       float64 `json:"price,omitempty"`
 		Currency    string  `json:"currency,omitempty"`
-		PerGram     float64 `json:"perGram,omitempty"`
+		EURPerGram  float64 `json:"eurPerGram,omitempty"`
 		Error       string  `json:"error,omitempty"`
 	}
 	items := make([]item, 0, len(results))
@@ -149,7 +147,7 @@ func (s *server) handleJSON(w http.ResponseWriter, r *http.Request) {
 			it.Error = res.Err.Error()
 		} else {
 			it.Price, _ = res.Price.Float64()
-			it.PerGram, _ = res.PricePerGram().Round(4).Float64()
+			it.EURPerGram, _ = res.EURPerGram.Round(4).Float64()
 			it.Currency = res.Currency
 		}
 		items = append(items, it)
