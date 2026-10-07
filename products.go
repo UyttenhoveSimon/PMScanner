@@ -15,8 +15,8 @@ var (
 // products lists the pages to scan. Any shop page exposing schema.org price
 // data (JSON-LD, microdata or Open Graph) works without site-specific code.
 //
-// Not scannable from plain HTTP: goldavenue.com (Vercel JS challenge) and
-// silvergoldbull (Cloudflare challenge).
+// Browser: true marks shops behind a bot challenge (goldavenue: Vercel,
+// silvergoldbull: Cloudflare); they need a Chromium-based browser installed.
 var products = []scraper.Product{
 	{Site: "or.fr", Description: "Gold bar 1kg Valcambi", WeightGrams: kg,
 		URL: "https://or.fr/achat/or/lingots/lingot-d-or-1-kilogramme-valcambi-60"},
@@ -111,6 +111,34 @@ var products = []scraper.Product{
 
 	{Site: "goldsilver.be", Description: "Silver Maple Leaf 1oz", WeightGrams: oz,
 		URL: "https://goldsilver.be/en/1-oz-30-gr/10863-1-oz-silver-maple-leaf-2026-5-bu.html"},
+
+	{Site: "goldavenue", Description: "Gold bar 1kg PAMP", WeightGrams: kg, Browser: true, Cookies: eur,
+		URL: "https://www.goldavenue.com/en/buy/gold/product/1-kg-gold-bar-999-9-fine-gold-carbon-measured-pamp-suisse"},
+	{Site: "goldavenue", Description: "Gold Krugerrand 1oz", WeightGrams: oz, Browser: true, Cookies: eur,
+		URL: "https://www.goldavenue.com/en/buy/gold/product/1-oz-fine-gold-coin-916-7-krugerrand-mixed-years"},
+	{Site: "goldavenue", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, Browser: true, Cookies: eur,
+		URL: "https://www.goldavenue.com/en/buy/gold/product/1-oz-fine-gold-coin-999-9-maple-leaf-bu-mixed-years"},
+	{Site: "goldavenue", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, Browser: true, Cookies: eur,
+		URL: "https://www.goldavenue.com/en/buy/silver/product/1-ounce-silver-coin-canada-maple-leaf-2026"},
+
+	// silvergoldbull has no structured price data; read the "1+" row of the
+	// quantity price table, or the headline price when there is no table.
+	{Site: "silvergoldbull", Description: "Gold bar 1kg RCM", WeightGrams: kg, Browser: true, Selectors: sgbPrice,
+		URL: "https://silvergoldbull.be/1-kilo-gold-bar-royal-canadian-mint"},
+	{Site: "silvergoldbull", Description: "Gold Krugerrand 1oz", WeightGrams: oz, Browser: true, Selectors: sgbPrice,
+		URL: "https://silvergoldbull.be/1-oz-2026-krugerrand-gold-coin-rand-refinery"},
+	{Site: "silvergoldbull", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, Browser: true, Selectors: sgbPrice,
+		URL: "https://silvergoldbull.be/1-oz-2026-canadian-maple-leaf-gold-coin-royal-canadian-mint"},
+	{Site: "silvergoldbull", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, Browser: true, Selectors: sgbPrice,
+		URL: "https://silvergoldbull.be/1-oz-2026-canadian-maple-leaf-silver-coin-royal-canadian-mint"},
 }
 
-var proaurum = []scraper.Source{scraper.Meta}
+var (
+	proaurum = []scraper.Source{scraper.Meta}
+	// goldavenue defaults to CHF.
+	eur      = map[string]string{"currency": "EUR"}
+	sgbPrice = []string{
+		`div[class~="tw:grid-cols-10"] > div:containsOwn("1+") + div`,
+		`h1 + div > div[class~="tw:font-bold"]`,
+	}
+)
