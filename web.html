@@ -259,6 +259,8 @@
           (type.value !== "" && sec.dataset.type !== type.value) || first;
       });
     };
+    // Gold first: other metals are one menu choice away.
+    if (store.get("metal") === null && [...metal.options].some((o) => o.value === "Gold")) metal.value = "Gold";
     for (const [el, key] of [[metal, "metal"], [type, "type"], [country, "country"]]) {
       const saved = store.get(key);
       if (saved !== null && [...el.options].some((o) => o.value === saved)) el.value = saved;
