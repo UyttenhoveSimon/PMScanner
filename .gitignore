@@ -21,3 +21,6 @@
 
 # Built binary
 /pmscanner
+
+# Scan files being written
+data/scans/*.tmp
