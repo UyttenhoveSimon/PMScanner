@@ -1253,7 +1253,6 @@ var products = []scraper.Product{
 	// Bulgaria
 	{Site: "tavex.bg", Country: "BG", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://tavex.bg/en/silver/1kg-valcambi-silver-bar/"},
 	{Site: "mygold.bg", Country: "BG", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://mygold.bg/1-kg-srebrno-kyulche-valcambi-suisse"},
-	{Site: "zlatenrezerv", Country: "BG", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://www.zlatenrezerv.bg/rafinerii-i-monetni-dvorove/valcambi-bg/valcambi-1-uncziya-zlatno-kyulche-copy/"},
 	{Site: "topgold", Country: "BG", Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://topgold.bg/product/1-uncziya-31-1-gr-platinena-moneta-vienska-filharmoniya-2025/"},
 	{Site: "topgold", Country: "BG", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://topgold.bg/product/1-uncziya-31-1-gr-platinena-moneta-kanadski-klenov-list-2025/"},
 	{Site: "topgold", Country: "BG", Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://topgold.bg/product/1-uncziya-31-1-gr-platinena-moneta-britaniya/"},
