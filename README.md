@@ -47,7 +47,9 @@ go run . -serve :8080
 ```
 
 Open <http://localhost:8080>. Prices are grouped by product with the cheapest
-offer highlighted. Use the **Scan** menu to look at a past scan.
+offer highlighted. The bar at the top filters by product **Type** and converts
+all prices to another **Currency** on the fly (ECB rates); both choices are
+remembered. Use the **Scan** menu to look at a past scan.
 
 The server rescans once a day, counting from the last saved scan, so restarting
 it does not trigger a new scan.
