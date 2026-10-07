@@ -1,0 +1,231 @@
+package main
+
+import (
+	_ "embed"
+	"html/template"
+	"io"
+	"slices"
+	"strconv"
+	"strings"
+	"time"
+
+	"pmscanner/fx"
+	"pmscanner/store"
+)
+
+//go:embed web.html
+var pageHTML string
+
+var page = template.Must(template.New("page").Parse(pageHTML))
+
+// categories group products on the page, matched by description prefix.
+var categories = []string{
+	"Gold bar 1kg",
+	"Gold Krugerrand 1oz",
+	"Gold Maple Leaf 1oz",
+	"Silver Maple Leaf 1oz",
+}
+
+const otherCategory = "Other"
+
+func categoryOf(description string) string {
+	for _, c := range categories {
+		if strings.HasPrefix(description, c) {
+			return c
+		}
+	}
+	return otherCategory
+}
+
+// countryByURL fills in the country of prices saved before it was recorded.
+var countryByURL = func() map[string]string {
+	m := make(map[string]string, len(products))
+	for _, p := range products {
+		m[p.URL] = p.Country
+	}
+	return m
+}()
+
+// scanListLimit caps how many past scans are listed and exported.
+const scanListLimit = 500
+
+const timeFormat = "2006-01-02 15:04 MST"
+
+// links builds the URLs a page points to, which differ between the live
+// server and the static export.
+type links interface {
+	Scan(id int64, latest bool) string
+	JSON(id int64) string
+	Latest() string
+}
+
+type row struct {
+	Site, Country, Description, URL, Price, PerGram, Currency, Error string
+	Best                                                             bool
+}
+
+type group struct {
+	Name string
+	Rows []row
+}
+
+type scanOption struct {
+	URL      string
+	Label    string
+	Selected bool
+}
+
+type pageData struct {
+	Groups     []group
+	Rates      map[string]float64 // units per euro, for switching currency in the page
+	Currencies []string
+	Countries  []string
+	Failed     []row
+	Scanned    string
+	Scanning   bool
+	IsLatest   bool
+	Scans      []scanOption
+	JSONURL    string
+	LatestURL  string
+}
+
+// buildPage gathers everything the page shows for one scan.
+func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, error) {
+	var data pageData
+	data.Rates, data.Currencies = currencyMenu(rates)
+
+	scanned, prices, err := db.Prices(id)
+	if err != nil {
+		return data, err
+	}
+	scans, err := db.Scans(scanListLimit)
+	if err != nil {
+		return data, err
+	}
+
+	data.Scanned = scanned.Local().Format(timeFormat)
+	data.IsLatest = len(scans) > 0 && scans[0].ID == id
+	data.JSONURL, data.LatestURL = l.JSON(id), l.Latest()
+	for i, sc := range scans {
+		label := sc.At.Local().Format(timeFormat)
+		if sc.Failed > 0 {
+			label += " (" + strconv.Itoa(sc.Failed) + " failed)"
+		}
+		data.Scans = append(data.Scans, scanOption{URL: l.Scan(sc.ID, i == 0), Label: label, Selected: sc.ID == id})
+	}
+
+	byName := map[string]*group{}
+	for _, name := range append(categories, otherCategory) {
+		data.Groups = append(data.Groups, group{Name: name})
+	}
+	for i := range data.Groups {
+		byName[data.Groups[i].Name] = &data.Groups[i]
+	}
+	countries := map[string]bool{}
+	// Prices are saved sorted by price per gram.
+	for _, p := range prices {
+		country := p.Country
+		if country == "" {
+			country = countryByURL[p.URL] // scans saved before countries were recorded
+		}
+		rw := row{Site: p.Site, Country: country, Description: p.Description, URL: p.URL}
+		if p.Error != "" {
+			rw.Error = p.Error
+			data.Failed = append(data.Failed, rw)
+			continue
+		}
+		rw.Price, rw.PerGram, rw.Currency = p.Price.StringFixed(2), p.EURPerGram.StringFixed(2), p.Currency
+		if country != "" {
+			countries[country] = true
+		}
+		g, ok := byName[p.Category]
+		if !ok {
+			g = byName[otherCategory]
+		}
+		rw.Best = len(g.Rows) == 0
+		g.Rows = append(g.Rows, rw)
+	}
+	for c := range countries {
+		data.Countries = append(data.Countries, c)
+	}
+	slices.Sort(data.Countries)
+	return data, nil
+}
+
+func renderPage(w io.Writer, data pageData) error {
+	return page.Execute(w, data)
+}
+
+// preferredCurrencies are listed first in the currency menu.
+var preferredCurrencies = []string{"EUR", "USD", "GBP", "CHF"}
+
+// currencyMenu returns the exchange rates for the page, as units per euro,
+// and the currency menu. Without rates, only EUR is offered.
+func currencyMenu(rates fx.Rates) (map[string]float64, []string) {
+	out := map[string]float64{"EUR": 1}
+	for cur, r := range rates {
+		out[cur], _ = r.Float64()
+	}
+	names := slices.DeleteFunc(slices.Clone(preferredCurrencies), func(c string) bool {
+		_, ok := out[c]
+		return !ok
+	})
+	var others []string
+	for cur := range out {
+		if !slices.Contains(names, cur) {
+			others = append(others, cur)
+		}
+	}
+	slices.Sort(others)
+	return out, append(names, others...)
+}
+
+type priceJSON struct {
+	Site        string  `json:"site"`
+	Country     string  `json:"country,omitempty"`
+	Category    string  `json:"category"`
+	Description string  `json:"description"`
+	URL         string  `json:"url"`
+	Price       float64 `json:"price,omitempty"`
+	Currency    string  `json:"currency,omitempty"`
+	EURPerGram  float64 `json:"eurPerGram,omitempty"`
+	Error       string  `json:"error,omitempty"`
+}
+
+// pricesJSON is the API representation of one scan.
+func pricesJSON(db *store.Store, id int64) (any, error) {
+	scanned, prices, err := db.Prices(id)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]priceJSON, 0, len(prices))
+	for _, p := range prices {
+		it := priceJSON{Site: p.Site, Country: p.Country, Category: p.Category, Description: p.Description, URL: p.URL, Error: p.Error}
+		if it.Country == "" {
+			it.Country = countryByURL[p.URL]
+		}
+		if p.Error == "" {
+			it.Price, _ = p.Price.Float64()
+			it.EURPerGram, _ = p.EURPerGram.Round(4).Float64()
+			it.Currency = p.Currency
+		}
+		items = append(items, it)
+	}
+	return map[string]any{"scan": id, "scanned": scanned, "prices": items}, nil
+}
+
+type scanJSON struct {
+	ID     int64     `json:"id"`
+	At     time.Time `json:"at"`
+	Count  int       `json:"count"`
+	Failed int       `json:"failed"`
+}
+
+// scansJSON is the API representation of the scan list.
+func scansJSON(scans []store.Scan) any {
+	items := make([]scanJSON, 0, len(scans))
+	for _, sc := range scans {
+		items = append(items, scanJSON{sc.ID, sc.At, sc.Count, sc.Failed})
+	}
+	return map[string]any{"scans": items}
+}

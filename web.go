@@ -1,58 +1,18 @@
 package main
 
 import (
-	_ "embed"
 	"encoding/json"
 	"errors"
-	"html/template"
 	"log"
 	"net"
 	"net/http"
-	"slices"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	"pmscanner/fx"
 	"pmscanner/store"
 )
-
-//go:embed web.html
-var pageHTML string
-
-var page = template.Must(template.New("page").Parse(pageHTML))
-
-// categories group products on the page, matched by description prefix.
-var categories = []string{
-	"Gold bar 1kg",
-	"Gold Krugerrand 1oz",
-	"Gold Maple Leaf 1oz",
-	"Silver Maple Leaf 1oz",
-}
-
-const otherCategory = "Other"
-
-// countryByURL fills in the country of prices saved before it was recorded.
-var countryByURL = func() map[string]string {
-	m := make(map[string]string, len(products))
-	for _, p := range products {
-		m[p.URL] = p.Country
-	}
-	return m
-}()
-
-// scanListLimit caps how many past scans the page and API list.
-const scanListLimit = 500
-
-func categoryOf(description string) string {
-	for _, c := range categories {
-		if strings.HasPrefix(description, c) {
-			return c
-		}
-	}
-	return otherCategory
-}
 
 // server rescans in the background and serves scans from the database.
 type server struct {
@@ -146,41 +106,24 @@ func (s *server) rescan() {
 // ratesMaxAge is how long ECB rates are reused; the ECB publishes once a day.
 const ratesMaxAge = 6 * time.Hour
 
-// preferredCurrencies are listed first in the currency menu.
-var preferredCurrencies = []string{"EUR", "USD", "GBP", "CHF"}
-
-// currencies returns the exchange rates for the page, as units per euro, and
-// the currency menu. Without rates, only EUR is offered.
-func (s *server) currencies() (map[string]float64, []string) {
+// currentRates returns cached ECB rates, refreshing them when stale.
+func (s *server) currentRates() fx.Rates {
 	s.mu.RLock()
 	rates, stale := s.rates, time.Since(s.ratesAt) > ratesMaxAge
 	s.mu.RUnlock()
-	if stale {
-		// Fetched outside the lock; concurrent requests may both fetch, which is harmless.
-		if fresh, err := fx.FetchECB(); err == nil {
-			rates = fresh
-			s.mu.Lock()
-			s.rates, s.ratesAt = fresh, time.Now()
-			s.mu.Unlock()
-		} else {
-			log.Printf("exchange rates: %v", err)
-		}
+	if !stale {
+		return rates
 	}
-
-	out := map[string]float64{"EUR": 1}
-	for cur, r := range rates {
-		out[cur], _ = r.Float64()
+	// Fetched outside the lock; concurrent requests may both fetch, which is harmless.
+	fresh, err := fx.FetchECB()
+	if err != nil {
+		log.Printf("exchange rates: %v", err)
+		return rates
 	}
-	names := append([]string(nil), preferredCurrencies...)
-	var others []string
-	for cur := range out {
-		if !slices.Contains(names, cur) {
-			others = append(others, cur)
-		}
-	}
-	slices.Sort(others)
-	names = slices.DeleteFunc(names, func(c string) bool { _, ok := out[c]; return !ok })
-	return out, append(names, others...)
+	s.mu.Lock()
+	s.rates, s.ratesAt = fresh, time.Now()
+	s.mu.Unlock()
+	return fresh
 }
 
 func (s *server) setScanning(v bool) {
@@ -195,6 +138,18 @@ func (s *server) isScanning() bool {
 	return s.scanning
 }
 
+// serverLinks points to the live server's routes.
+type serverLinks struct{}
+
+func (serverLinks) Scan(id int64, latest bool) string {
+	if latest {
+		return "/"
+	}
+	return "/?scan=" + strconv.FormatInt(id, 10)
+}
+func (serverLinks) JSON(id int64) string { return "/api/prices?scan=" + strconv.FormatInt(id, 10) }
+func (serverLinks) Latest() string       { return "/" }
+
 // scanID reads ?scan=ID, defaulting to the latest scan.
 func (s *server) scanID(r *http.Request) (int64, error) {
 	if v := r.URL.Query().Get("scan"); v != "" {
@@ -207,126 +162,27 @@ func (s *server) scanID(r *http.Request) (int64, error) {
 	return s.db.Latest()
 }
 
-type row struct {
-	Site, Country, Description, URL, Price, PerGram, Currency, Error string
-	Best                                                             bool
-}
-
-type group struct {
-	Name string
-	Rows []row
-}
-
-type scanOption struct {
-	ID       int64
-	Label    string
-	Selected bool
-}
-
-type pageData struct {
-	Groups     []group
-	Rates      map[string]float64 // units per euro, for switching currency in the page
-	Currencies []string
-	Countries  []string
-	Failed     []row
-	Scanned    string
-	Scanning   bool
-	IsLatest   bool
-	Scans      []scanOption
-}
-
-const timeFormat = "2006-01-02 15:04"
-
 func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
-	data := pageData{Scanning: s.isScanning()}
-	data.Rates, data.Currencies = s.currencies()
-
 	id, err := s.scanID(r)
+	var data pageData
+	if err == nil {
+		data, err = buildPage(s.db, id, serverLinks{}, s.currentRates())
+	}
 	switch {
-	case errors.Is(err, store.ErrNotFound) && r.URL.Query().Has("scan"):
-		http.Error(w, "scan not found", http.StatusNotFound)
-		return
+	case errors.Is(err, store.ErrNotFound) && !r.URL.Query().Has("scan"):
+		data = pageData{} // no scan yet
 	case errors.Is(err, store.ErrNotFound):
-		s.render(w, data) // no scan yet
+		http.Error(w, "scan not found", http.StatusNotFound)
 		return
 	case err != nil:
 		s.serverError(w, err)
 		return
 	}
-
-	scanned, prices, err := s.db.Prices(id)
-	if errors.Is(err, store.ErrNotFound) {
-		http.Error(w, "scan not found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		s.serverError(w, err)
-		return
-	}
-	scans, err := s.db.Scans(scanListLimit)
-	if err != nil {
-		s.serverError(w, err)
-		return
-	}
-
-	data.Scanned = scanned.Local().Format(timeFormat)
-	data.IsLatest = len(scans) > 0 && scans[0].ID == id
-	for _, sc := range scans {
-		label := sc.At.Local().Format(timeFormat)
-		if sc.Failed > 0 {
-			label += " (" + strconv.Itoa(sc.Failed) + " failed)"
-		}
-		data.Scans = append(data.Scans, scanOption{ID: sc.ID, Label: label, Selected: sc.ID == id})
-	}
-
-	byName := map[string]*group{}
-	for _, name := range append(categories, otherCategory) {
-		data.Groups = append(data.Groups, group{Name: name})
-	}
-	for i := range data.Groups {
-		byName[data.Groups[i].Name] = &data.Groups[i]
-	}
-	countries := map[string]bool{}
-	// Prices are saved sorted by price per gram.
-	for _, p := range prices {
-		country := p.Country
-		if country == "" {
-			country = countryByURL[p.URL] // scans saved before countries were recorded
-		}
-		rw := row{Site: p.Site, Country: country, Description: p.Description, URL: p.URL}
-		if p.Error != "" {
-			rw.Error = p.Error
-			data.Failed = append(data.Failed, rw)
-			continue
-		}
-		rw.Price, rw.PerGram, rw.Currency = p.Price.StringFixed(2), p.EURPerGram.StringFixed(2), p.Currency
-		if country != "" {
-			countries[country] = true
-		}
-		g, ok := byName[p.Category]
-		if !ok {
-			g = byName[otherCategory]
-		}
-		rw.Best = len(g.Rows) == 0
-		g.Rows = append(g.Rows, rw)
-	}
-	for c := range countries {
-		data.Countries = append(data.Countries, c)
-	}
-	slices.Sort(data.Countries)
-	s.render(w, data)
-}
-
-func (s *server) render(w http.ResponseWriter, data pageData) {
+	data.Scanning = s.isScanning()
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := page.Execute(w, data); err != nil {
+	if err := renderPage(w, data); err != nil {
 		log.Printf("render: %v", err)
 	}
-}
-
-func (s *server) serverError(w http.ResponseWriter, err error) {
-	log.Printf("request: %v", err)
-	http.Error(w, "internal error", http.StatusInternalServerError)
 }
 
 func (s *server) handlePrices(w http.ResponseWriter, r *http.Request) {
@@ -335,36 +191,12 @@ func (s *server) handlePrices(w http.ResponseWriter, r *http.Request) {
 		s.apiError(w, err)
 		return
 	}
-	scanned, prices, err := s.db.Prices(id)
+	v, err := pricesJSON(s.db, id)
 	if err != nil {
 		s.apiError(w, err)
 		return
 	}
-	type item struct {
-		Site        string  `json:"site"`
-		Country     string  `json:"country,omitempty"`
-		Category    string  `json:"category"`
-		Description string  `json:"description"`
-		URL         string  `json:"url"`
-		Price       float64 `json:"price,omitempty"`
-		Currency    string  `json:"currency,omitempty"`
-		EURPerGram  float64 `json:"eurPerGram,omitempty"`
-		Error       string  `json:"error,omitempty"`
-	}
-	items := make([]item, 0, len(prices))
-	for _, p := range prices {
-		it := item{Site: p.Site, Country: p.Country, Category: p.Category, Description: p.Description, URL: p.URL, Error: p.Error}
-		if it.Country == "" {
-			it.Country = countryByURL[p.URL]
-		}
-		if p.Error == "" {
-			it.Price, _ = p.Price.Float64()
-			it.EURPerGram, _ = p.EURPerGram.Round(4).Float64()
-			it.Currency = p.Currency
-		}
-		items = append(items, it)
-	}
-	writeJSON(w, map[string]any{"scan": id, "scanned": scanned, "prices": items})
+	writeJSON(w, v)
 }
 
 func (s *server) handleScans(w http.ResponseWriter, r *http.Request) {
@@ -373,17 +205,12 @@ func (s *server) handleScans(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, err)
 		return
 	}
-	type item struct {
-		ID     int64     `json:"id"`
-		At     time.Time `json:"at"`
-		Count  int       `json:"count"`
-		Failed int       `json:"failed"`
-	}
-	items := make([]item, 0, len(scans))
-	for _, sc := range scans {
-		items = append(items, item{sc.ID, sc.At, sc.Count, sc.Failed})
-	}
-	writeJSON(w, map[string]any{"scans": items})
+	writeJSON(w, scansJSON(scans))
+}
+
+func (s *server) serverError(w http.ResponseWriter, err error) {
+	log.Printf("request: %v", err)
+	http.Error(w, "internal error", http.StatusInternalServerError)
 }
 
 func (s *server) apiError(w http.ResponseWriter, err error) {

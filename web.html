@@ -24,7 +24,7 @@
   h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
   h1 span { color: var(--accent); }
   .meta { color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-  .meta form { display: flex; align-items: center; gap: 6px; margin: 0; }
+  .scan-menu { display: flex; align-items: center; gap: 6px; }
   select { font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--line);
     border-radius: 6px; padding: 3px 6px; max-width: 100%; }
   .old { margin: 16px 0 0; padding: 10px 14px; border-radius: 8px; background: var(--best);
@@ -66,20 +66,18 @@
     <h1>PM <span>Scanner</span></h1>
     <div class="meta">
       {{if .Scans}}
-      <form method="get" action="/">
-        <label for="scan">Scan</label>
-        <select id="scan" name="scan" onchange="this.form.submit()">
-          {{range .Scans}}<option value="{{.ID}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}
+      <label class="scan-menu">Scan
+        <select id="scan" onchange="location.href = this.value">
+          {{range .Scans}}<option value="{{.URL}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}
         </select>
-        <noscript><button type="submit">Show</button></noscript>
-      </form>
+      </label>
       {{end}}
       {{if .Scanning}}<span>scanning…</span>{{end}}
-      <a href="/api/prices{{range .Scans}}{{if .Selected}}?scan={{.ID}}{{end}}{{end}}">JSON</a>
+      {{if .JSONURL}}<a href="{{.JSONURL}}">JSON</a>{{end}}
     </div>
   </header>
   {{if and .Scanned (not .IsLatest)}}
-    <p class="old">You are looking at the scan of {{.Scanned}}. <a href="/">Show the latest</a></p>
+    <p class="old">You are looking at the scan of {{.Scanned}}. <a href="{{.LatestURL}}">Show the latest</a></p>
   {{end}}
 
   {{if not .Scanned}}

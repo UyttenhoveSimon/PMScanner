@@ -20,6 +20,7 @@ func main() {
 	serve := flag.String("serve", "", "serve a web page on this address (e.g. :8080) instead of printing a table")
 	refresh := flag.Duration("refresh", 24*time.Hour, "how often the web server rescans prices (0 disables automatic scans)")
 	dbPath := flag.String("db", "pmscanner.db", "SQLite database where every scan is saved")
+	exportDir := flag.String("export", "", "write a static copy of the web page for the saved scans to this directory, without scanning")
 	flag.Parse()
 
 	db, err := store.Open(*dbPath)
@@ -27,6 +28,14 @@ func main() {
 		log.Fatalf("open database: %v", err)
 	}
 	defer db.Close()
+
+	if *exportDir != "" {
+		if err := exportSite(*exportDir, db); err != nil {
+			db.Close()
+			log.Fatalf("export: %v", err)
+		}
+		return
+	}
 
 	if *serve != "" {
 		if err := runServer(*serve, *refresh, db); err != nil {
