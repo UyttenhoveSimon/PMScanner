@@ -191,6 +191,14 @@
     const code = el.dataset.code || el.value;
     if (names && code) el.textContent = names.of(code);
   });
+  // Sort the country menu by those names, keeping "All countries" first.
+  const countryMenu = document.getElementById("country");
+  if (countryMenu) {
+    const collator = new Intl.Collator(navigator.language);
+    [...countryMenu.options].filter((o) => o.value !== "")
+      .sort((a, b) => collator.compare(a.textContent, b.textContent))
+      .forEach((o) => countryMenu.appendChild(o));
+  }
 
   // Metal, type and country filters; the cheapest badge follows the visible rows.
   const metal = document.getElementById("metal");
