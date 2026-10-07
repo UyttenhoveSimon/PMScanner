@@ -1013,6 +1013,29 @@ var products = []scraper.Product{
 	{Site: "gerettigold", Country: "LT", Description: "Gold Britannia 1oz", WeightGrams: oz, URL: "https://gerettigold.lt/parduotuve/auksines-monetos/1-oz-didzioji-britanija-auksine-moneta-2024/"},
 	{Site: "gerettigold", Country: "LT", Description: "Gold Kangaroo 1oz", WeightGrams: oz, URL: "https://gerettigold.lt/parduotuve/auksines-monetos/1-oz-kengura-auksine-moneta-2024/"},
 	{Site: "monetupasaulis", Country: "LT", Description: "Gold Eagle 1oz", WeightGrams: oz, URL: "https://www.monetupasaulis.lt/preke/1-oz-auksine-moneta-amerikos-erelis-american-eagle-2023-jav/"},
+	// AuCOFFRE (FR) is a marketplace: each page lists sellers' offers for one
+	// coin type, filtered to deliverable ones and sorted by price, so the
+	// first offer is the cheapest.
+	{Site: "aucoffre", Country: "FR", Description: "Gold Krugerrand 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-7/stype-2/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-12/stype-18/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Eagle 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-10/stype-19/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Kangaroo 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-13/stype-21/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Philharmonic 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-14/stype-40/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Britannia 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-16/stype-17/stype-152/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Sovereign", WeightGrams: sovereign, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-8/stype-3/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Vreneli 20 CHF", WeightGrams: vreneli, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-6/stype-180/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Gold Napoleon 20 FF", WeightGrams: napoleon, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-1/marketing_list-5/stype-1/produit?livraison=1&market_sorter=price_asc"},
+	{Site: "aucoffre", Country: "FR", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, Sources: cssOnly, Selectors: aucoffre,
+		URL: "https://www.aucoffre.com/recherche/metal-5/marketing_list-12/stype-319/produit?livraison=1&market_sorter=price_asc"},
 }
 
 var (
@@ -1023,6 +1046,7 @@ var (
 	metaOnly   = []scraper.Source{scraper.Meta}
 	cssOnly    = []scraper.Source{scraper.CSS}
 	proaurumCH = []string{".price-ask_price .price"}
+	aucoffre   = []string{"article.product-card .product-price p:first-child"}
 	// goldavenue defaults to CHF.
 	eur = map[string]string{"currency": "EUR"}
 )
