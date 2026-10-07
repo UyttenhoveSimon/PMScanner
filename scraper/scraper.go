@@ -53,6 +53,9 @@ type Product struct {
 	Selectors []string
 	// Cookies are sent with the request, e.g. to pick the shop's currency.
 	Cookies map[string]string
+	// RateGroup makes shops that share a backend, and so a rate limit,
+	// share one request limit; by default each host has its own.
+	RateGroup string
 	// Browser loads the page in a headless browser, for shops that block
 	// plain HTTP clients with a JavaScript challenge.
 	Browser bool
@@ -131,10 +134,14 @@ func Scrape(products []Product) []Result {
 			browserIdx = append(browserIdx, i)
 			continue
 		}
-		host := hosts[hostOf(p.URL)]
+		key := p.RateGroup
+		if key == "" {
+			key = hostOf(p.URL)
+		}
+		host := hosts[key]
 		if host == nil {
 			host = &hostState{slots: make(chan struct{}, maxRequestsPerHost)}
-			hosts[hostOf(p.URL)] = host
+			hosts[key] = host
 		}
 		wg.Add(1)
 		go func() {
