@@ -91,7 +91,7 @@ func toPrices(entries []entry) []store.Price {
 	prices := make([]store.Price, len(entries))
 	for i, e := range entries {
 		p := store.Price{
-			Site: e.Site, Category: categoryOf(e.Description), Description: e.Description, URL: e.URL,
+			Site: e.Site, Country: e.Country, Category: categoryOf(e.Description), Description: e.Description, URL: e.URL,
 			Price: e.Price, Currency: e.Currency, EURPerGram: e.EURPerGram,
 		}
 		if e.Err != nil {

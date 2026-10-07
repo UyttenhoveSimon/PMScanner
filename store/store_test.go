@@ -22,7 +22,7 @@ func TestSaveAndLoad(t *testing.T) {
 
 	at := time.Date(2026, 10, 7, 12, 0, 0, 0, time.UTC)
 	in := []Price{
-		{Site: "b", Category: "Gold bar 1kg", Description: "Gold bar 1kg", URL: "https://b",
+		{Site: "b", Country: "BE", Category: "Gold bar 1kg", Description: "Gold bar 1kg", URL: "https://b",
 			Price: decimal.RequireFromString("119000.50"), Currency: "EUR",
 			EURPerGram: decimal.RequireFromString("119.0005")},
 		{Site: "a", Category: "Gold bar 1kg", Description: "Gold bar 1kg", URL: "https://a",
@@ -56,12 +56,39 @@ func TestSaveAndLoad(t *testing.T) {
 	if !when.Equal(at) {
 		t.Errorf("time = %v, want %v", when, at)
 	}
-	if len(out) != 2 || out[0].Site != "b" || !out[0].Price.Equal(in[0].Price) ||
+	if len(out) != 2 || out[0].Site != "b" || out[0].Country != "BE" || !out[0].Price.Equal(in[0].Price) ||
 		!out[0].EURPerGram.Equal(in[0].EURPerGram) || out[1].Error != "no price found" {
 		t.Errorf("Prices = %+v", out)
 	}
 
 	if _, _, err := s.Prices(999); !errors.Is(err, ErrNotFound) {
 		t.Errorf("Prices(999) err = %v, want ErrNotFound", err)
+	}
+}
+
+func TestMigrateAddsCountry(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "old.db")
+	s, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Recreate the prices table as it was before the country column.
+	if _, err := s.db.Exec(`DROP TABLE prices; CREATE TABLE prices (
+		scan_id INTEGER NOT NULL, position INTEGER NOT NULL, site TEXT NOT NULL,
+		category TEXT NOT NULL, description TEXT NOT NULL, url TEXT NOT NULL,
+		price TEXT NOT NULL DEFAULT '', currency TEXT NOT NULL DEFAULT '',
+		eur_per_gram TEXT NOT NULL DEFAULT '', error TEXT NOT NULL DEFAULT '',
+		PRIMARY KEY (scan_id, position))`); err != nil {
+		t.Fatal(err)
+	}
+	s.Close()
+
+	s, err = Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if _, err := s.Save(time.Now(), []Price{{Site: "a", Country: "FR", Error: "x"}}); err != nil {
+		t.Fatalf("save after migration: %v", err)
 	}
 }
