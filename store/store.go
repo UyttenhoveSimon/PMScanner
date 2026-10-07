@@ -27,6 +27,7 @@ type Scan struct {
 type Price struct {
 	Site        string
 	Country     string
+	VAT         string
 	Category    string
 	Description string
 	URL         string
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS prices (
 	eur_per_gram TEXT NOT NULL DEFAULT '',
 	error        TEXT NOT NULL DEFAULT '',
 	country      TEXT NOT NULL DEFAULT '',
+	vat          TEXT NOT NULL DEFAULT '',
 	PRIMARY KEY (scan_id, position)
 );
 CREATE INDEX IF NOT EXISTS prices_url ON prices(url);
@@ -82,13 +84,19 @@ func Open(path string) (*Store, error) {
 
 // migrate adds columns introduced after a database was created.
 func migrate(db *sql.DB) error {
-	var n int
-	err := db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('prices') WHERE name = 'country'`).Scan(&n)
-	if err != nil || n > 0 {
-		return err
+	for _, col := range []string{"country", "vat"} {
+		var n int
+		err := db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('prices') WHERE name = ?`, col).Scan(&n)
+		if err != nil {
+			return err
+		}
+		if n == 0 {
+			if _, err := db.Exec(`ALTER TABLE prices ADD COLUMN ` + col + ` TEXT NOT NULL DEFAULT ''`); err != nil {
+				return err
+			}
+		}
 	}
-	_, err = db.Exec(`ALTER TABLE prices ADD COLUMN country TEXT NOT NULL DEFAULT ''`)
-	return err
+	return nil
 }
 
 // Close closes the database.
@@ -111,8 +119,8 @@ func (s *Store) Save(at time.Time, prices []Price) (int64, error) {
 		return 0, err
 	}
 	stmt, err := tx.Prepare(`INSERT INTO prices
-		(scan_id, position, site, country, category, description, url, price, currency, eur_per_gram, error)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		(scan_id, position, site, country, vat, category, description, url, price, currency, eur_per_gram, error)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return 0, err
 	}
@@ -122,7 +130,7 @@ func (s *Store) Save(at time.Time, prices []Price) (int64, error) {
 		if p.Error == "" {
 			price, perGram = p.Price.String(), p.EURPerGram.String()
 		}
-		if _, err := stmt.Exec(id, i, p.Site, p.Country, p.Category, p.Description, p.URL,
+		if _, err := stmt.Exec(id, i, p.Site, p.Country, p.VAT, p.Category, p.Description, p.URL,
 			price, p.Currency, perGram, p.Error); err != nil {
 			return 0, err
 		}
@@ -181,7 +189,7 @@ func (s *Store) Prices(scanID int64) (time.Time, []Price, error) {
 	}
 
 	rows, err := s.db.Query(`
-		SELECT site, country, category, description, url, price, currency, eur_per_gram, error
+		SELECT site, country, vat, category, description, url, price, currency, eur_per_gram, error
 		FROM prices WHERE scan_id = ? ORDER BY position`, scanID)
 	if err != nil {
 		return time.Time{}, nil, err
@@ -191,7 +199,7 @@ func (s *Store) Prices(scanID int64) (time.Time, []Price, error) {
 	for rows.Next() {
 		var p Price
 		var price, perGram string
-		if err := rows.Scan(&p.Site, &p.Country, &p.Category, &p.Description, &p.URL,
+		if err := rows.Scan(&p.Site, &p.Country, &p.VAT, &p.Category, &p.Description, &p.URL,
 			&price, &p.Currency, &perGram, &p.Error); err != nil {
 			return time.Time{}, nil, err
 		}

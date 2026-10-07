@@ -51,6 +51,8 @@ type Product struct {
 	// Selectors are CSS selectors for the price element, tried in order, for
 	// shops without structured price data. The element text is the price.
 	Selectors []string
+	// VAT says how the price is taxed; empty means the default for the metal.
+	VAT VAT
 	// Currency is used when the page gives a price without a currency.
 	Currency string
 	// Cookies are sent with the request, e.g. to pick the shop's currency.
@@ -62,6 +64,16 @@ type Product struct {
 	// plain HTTP clients with a JavaScript challenge.
 	Browser bool
 }
+
+// VAT is how value-added tax applies to a price.
+type VAT string
+
+const (
+	VATExempt   VAT = "exempt"   // investment gold
+	VATIncluded VAT = "included" // VAT is in the price
+	VATMargin   VAT = "margin"   // margin scheme: VAT on the dealer's margin, in the price
+	VATExcluded VAT = "excluded" // VAT is not in the price (e.g. vault storage)
+)
 
 // Result is the outcome of scraping one Product.
 type Result struct {

@@ -36,6 +36,9 @@
   section { margin-top: 28px; scroll-margin-top: 64px; }
   section[hidden], tr[hidden] { display: none; }
   td.country-name { color: var(--muted); }
+  .vat { display: block; font-size: 11px; color: var(--muted); }
+  .vat-excluded { color: var(--err); }
+  .note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
   .to-top { position: fixed; right: 16px; bottom: 16px; width: 40px; height: 40px; border-radius: 50%;
     border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 18px;
     cursor: pointer; box-shadow: 0 2px 8px rgb(0 0 0 / 0.12); opacity: 0; pointer-events: none;
@@ -108,6 +111,7 @@
         </select>
       </label>
     </div>
+    <p class="note">Investment gold is VAT exempt in the EU, the UK and Switzerland. Other metals are shown as the shop sells them: incl. VAT, with VAT on the dealer's margin only (margin VAT), or excl. VAT (e.g. kept in a vault).</p>
     {{range .Groups}}{{if .Rows}}
     <section id="{{.Name}}" data-type="{{.Name}}" data-metal="{{.Metal}}">
       <h2>{{.Name}}</h2>
@@ -120,7 +124,7 @@
               <td><a href="{{.URL}}" target="_blank" rel="noopener">{{.Site}}</a></td>
               <td class="country-name" data-code="{{.Country}}">{{.Country}}</td>
               <td class="desc">{{.Description}}</td>
-              <td class="num price" data-amount="{{.Price}}" data-currency="{{.Currency}}">{{.Price}} {{.Currency}}</td>
+              <td class="num"><span class="price" data-amount="{{.Price}}" data-currency="{{.Currency}}">{{.Price}} {{.Currency}}</span><span class="vat vat-{{.VAT}}">{{.VATLabel}}</span></td>
               <td class="num per-gram" data-eur="{{.PerGram}}">{{.PerGram}}</td>
             </tr>
           {{end}}

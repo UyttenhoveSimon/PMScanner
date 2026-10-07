@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"pmscanner/fx"
+	"pmscanner/scraper"
 	"pmscanner/store"
 )
 
@@ -61,14 +62,47 @@ func categoryOf(description string) string {
 	return otherCategory
 }
 
-// countryByURL fills in the country of prices saved before it was recorded.
-var countryByURL = func() map[string]string {
-	m := make(map[string]string, len(products))
+// productByURL fills in details of prices saved before they were recorded.
+var productByURL = func() map[string]scraper.Product {
+	m := make(map[string]scraper.Product, len(products))
 	for _, p := range products {
-		m[p.URL] = p.Country
+		m[p.URL] = p
 	}
 	return m
 }()
+
+// vatOf returns how a product's price is taxed: investment gold is VAT-exempt
+// in the EU, UK and Switzerland, and other metals include VAT unless the
+// product says otherwise.
+func vatOf(p scraper.Product) scraper.VAT {
+	if p.VAT != "" {
+		return p.VAT
+	}
+	if metalOf(categoryOf(p.Description)) == "Gold" {
+		return scraper.VATExempt
+	}
+	return scraper.VATIncluded
+}
+
+// vatLabels are shown next to prices.
+var vatLabels = map[scraper.VAT]string{
+	scraper.VATExempt:   "VAT exempt",
+	scraper.VATIncluded: "incl. VAT",
+	scraper.VATMargin:   "margin VAT",
+	scraper.VATExcluded: "excl. VAT",
+}
+
+// savedVAT returns a saved price's VAT, working it out for scans saved
+// before it was recorded.
+func savedVAT(p store.Price) scraper.VAT {
+	if p.VAT != "" {
+		return scraper.VAT(p.VAT)
+	}
+	if prod, ok := productByURL[p.URL]; ok {
+		return vatOf(prod)
+	}
+	return vatOf(scraper.Product{Description: p.Description})
+}
 
 // scanListLimit caps how many past scans are listed and exported.
 const scanListLimit = 500
@@ -85,6 +119,7 @@ type links interface {
 
 type row struct {
 	Site, Country, Description, URL, Price, PerGram, Currency, Error string
+	VAT, VATLabel                                                    string
 	Best                                                             bool
 }
 
@@ -152,7 +187,7 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 	for _, p := range prices {
 		country := p.Country
 		if country == "" {
-			country = countryByURL[p.URL] // scans saved before countries were recorded
+			country = productByURL[p.URL].Country // scans saved before countries were recorded
 		}
 		rw := row{Site: p.Site, Country: country, Description: p.Description, URL: p.URL}
 		if p.Error != "" {
@@ -161,6 +196,8 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates) (pageData, er
 			continue
 		}
 		rw.Price, rw.PerGram, rw.Currency = p.Price.StringFixed(2), p.EURPerGram.StringFixed(2), p.Currency
+		vat := savedVAT(p)
+		rw.VAT, rw.VATLabel = string(vat), vatLabels[vat]
 		if country != "" {
 			countries[country] = true
 		}
@@ -220,6 +257,7 @@ type priceJSON struct {
 	Price       float64 `json:"price,omitempty"`
 	Currency    string  `json:"currency,omitempty"`
 	EURPerGram  float64 `json:"eurPerGram,omitempty"`
+	VAT         string  `json:"vat,omitempty"`
 	Error       string  `json:"error,omitempty"`
 }
 
@@ -233,12 +271,13 @@ func pricesJSON(db *store.Store, id int64) (any, error) {
 	for _, p := range prices {
 		it := priceJSON{Site: p.Site, Country: p.Country, Category: p.Category, Description: p.Description, URL: p.URL, Error: p.Error}
 		if it.Country == "" {
-			it.Country = countryByURL[p.URL]
+			it.Country = productByURL[p.URL].Country
 		}
 		if p.Error == "" {
 			it.Price, _ = p.Price.Float64()
 			it.EURPerGram, _ = p.EURPerGram.Round(4).Float64()
 			it.Currency = p.Currency
+			it.VAT = string(savedVAT(p))
 		}
 		items = append(items, it)
 	}
