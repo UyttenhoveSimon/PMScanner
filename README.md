@@ -24,8 +24,10 @@ stonexbullion  Gold Krugerrand 1oz    3730.60 EUR    119.94    https://stonexbul
 - **Fast.** All pages are fetched concurrently; a full scan takes about 25 seconds.
 - **Works behind bot walls.** Shops protected by Cloudflare or similar are loaded in
   a headless Chromium-based browser.
-- **Web page and JSON API.** `-serve` starts a page that rescans in the background
-  and exposes the results at `/api/prices`.
+- **History.** Every scan is saved in a small SQLite database, and past scans can be
+  browsed on the web page or through the JSON API.
+- **Web page and JSON API.** `-serve` starts a page that rescans once a day in the
+  background.
 - **Easy to extend.** Adding a shop is usually one line in [`products.go`](products.go).
 
 ## Quick start
@@ -45,17 +47,26 @@ go run . -serve :8080
 ```
 
 Open <http://localhost:8080>. Prices are grouped by product with the cheapest
-offer highlighted, and rescanned every 30 minutes.
+offer highlighted. Use the **Scan** menu to look at a past scan.
 
-| Flag       | Default | Description                                          |
-| ---------- | ------- | ---------------------------------------------------- |
-| `-serve`   |         | Address to serve the web page on, e.g. `:8080`       |
-| `-refresh` | `30m`   | How often the web page rescans prices                |
+The server rescans once a day, counting from the last saved scan, so restarting
+it does not trigger a new scan.
 
-| Endpoint      | Description                     |
-| ------------- | ------------------------------- |
-| `/`           | Price tables                    |
-| `/api/prices` | Latest scan as JSON             |
+| Flag       | Default        | Description                                               |
+| ---------- | -------------- | --------------------------------------------------------- |
+| `-serve`   |                | Address to serve the web page on, e.g. `:8080`            |
+| `-refresh` | `24h`          | How often the server rescans; `0` disables automatic scans |
+| `-db`      | `pmscanner.db` | SQLite database where every scan is saved                 |
+
+| Endpoint               | Description                       |
+| ---------------------- | --------------------------------- |
+| `/`                    | Price tables of the latest scan   |
+| `/?scan=ID`            | Price tables of a past scan       |
+| `/api/scans`           | List of saved scans as JSON       |
+| `/api/prices`          | Latest scan as JSON               |
+| `/api/prices?scan=ID`  | A past scan as JSON               |
+
+Running `go run .` without `-serve` also saves its scan to the database.
 
 ### Browser mode
 
@@ -100,7 +111,9 @@ For each product page, PMScanner tries these sources in order and keeps the firs
 ├── main.go          # CLI: scan and print the table
 ├── web.go, web.html # -serve: web page and JSON API
 ├── products.go      # the list of shops and products
-└── scraper/         # fetching (HTTP or headless browser) and price extraction
+├── scraper/         # fetching (HTTP or headless browser) and price extraction
+├── fx/              # conversion to euros with ECB reference rates
+└── store/           # SQLite storage of every scan
 ```
 
 ## Contributing
