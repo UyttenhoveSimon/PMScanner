@@ -23,6 +23,14 @@ var categories = []string{
 	"Gold bar 1kg",
 	"Gold Krugerrand 1oz",
 	"Gold Maple Leaf 1oz",
+	"Gold Philharmonic 1oz",
+	"Gold Britannia 1oz",
+	"Gold Eagle 1oz",
+	"Gold Kangaroo 1oz",
+	"Gold Sovereign",
+	"Gold 20 Mark",
+	"Gold Vreneli 20 CHF",
+	"Gold Napoleon 20 FF",
 	"Silver Maple Leaf 1oz",
 }
 

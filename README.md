@@ -117,9 +117,11 @@ Add an entry to [`products.go`](products.go):
     URL: "https://myshop.example/krugerrand-1oz"},
 ```
 
-Start the description with one of the product categories (`Gold bar 1kg`,
-`Gold Krugerrand 1oz`, `Gold Maple Leaf 1oz`, `Silver Maple Leaf 1oz`) to group it
-on the web page. If the price doesn't come out right, these options help:
+Start the description with one of the product categories listed in
+[`page.go`](page.go) (`Gold bar 1kg`, `Gold Krugerrand 1oz`, `Gold Vreneli 20 CHF`,
+`Gold Sovereign`, …) to group it on the web page. `WeightGrams` is the **fine**
+metal content, e.g. 5.806 g for a Vreneli, so all products compare per gram of
+pure gold. If the price doesn't come out right, these options help:
 
 | Field       | Use when                                                                  |
 | ----------- | ------------------------------------------------------------------------- |
