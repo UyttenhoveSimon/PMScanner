@@ -1185,6 +1185,28 @@ var products = []scraper.Product{
 	{Site: "suissegold", Country: "CH", Description: "Palladium coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://suissegold.com/en/product/1-ounce-palladium-canadian-maple-leaf-coins-bu"},
 	// Liechtenstein
 	{Site: "philoro.li", Country: "LI", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://philoro.li/produkt/silberbarren-1000-g-diverse-hersteller-7001v"},
+
+	// Silver bars and platinum: Southern Europe
+	// Spain
+	{Site: "andorrano", Country: "ES", Description: "Silver bar 1kg Germania Mint", WeightGrams: kg, URL: "https://www.andorrano-joyeria.com/lingotes-de-plata/lingote-plata-germania-mint-1kg-info"},
+	{Site: "dracma", Country: "ES", Description: "Silver bar 1kg Sempsa", WeightGrams: kg, URL: "https://www.dracmametales.com/lingotes-de-plata/1000gr-plata-lingote"},
+	{Site: "orodeinversion", Country: "ES", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://orodeinversion.com/shop/lingote-de-plata-1-kg-7"},
+	{Site: "orohispanica", Country: "ES", Description: "Silver bar 1kg Sempsa", WeightGrams: kg, Sources: cssOnly, Selectors: []string{"p.price .woocommerce-Price-amount"}, URL: "https://www.orohispanica.es/tienda/lingotes-de-plata/lingote-acunado-de-plata-9999-de-1000-gr-en-blister-marca-sempsa/"},
+	// Italy
+	{Site: "italpreziosi", Country: "IT", Description: "Silver bar 1kg", WeightGrams: kg, Sources: cssOnly, Selectors: []string{"p.price .woocommerce-Price-amount"}, URL: "https://shop.italpreziosi.it/investimento/lingotti/argento/lingotto-argento-1-kg/"},
+	{Site: "euronummus", Country: "IT", Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://www.euronummus.it/300-lingotto-argento-puro-argor-heraeus-1000-grammi.html"},
+	{Site: "orodainvestimento", Country: "IT", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.orodainvestimento.it/acquisto/lingotto-dargento-1-kg/"},
+	// Greece
+	{Site: "xrisos.gr", Country: "GR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://xrisos.gr/products/silver-bar-1000g"},
+	{Site: "xrisos.gr", Country: "GR", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://xrisos.gr/products/platinum-coin-maple-leaf-1-oz"},
+	// Slovenia
+	{Site: "centerzlata", Country: "SI", Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://centerzlata.com/izdelek/1000g-srebra-argor-heraeus-2/"},
+	{Site: "hisazlata", Country: "SI", Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://hisazlata.com/izdelek/srebrna-palica-1000-g-argor-heraeus/"},
+	{Site: "zlatopoposti", Country: "SI", Description: "Silver bar 1kg", WeightGrams: kg, Sources: cssOnly, Selectors: []string{"p.price .woocommerce-Price-amount"}, URL: "https://zlatopoposti.si/izdelek/1000g-srebrna-palica/"},
+	// Croatia
+	{Site: "zlatosrebro.hr", Country: "HR", RateGroup: gvs, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://www.zlatosrebro.hr/1kg-srebrna-poluga-argor-heraeus.html"},
+	{Site: "zlatosrebro.hr", Country: "HR", RateGroup: gvs, Description: "Platinum bar 1oz", WeightGrams: oz, URL: "https://www.zlatosrebro.hr/1-oz-platinbarren-diverse-hersteller.html"},
+	{Site: "zlatosrebro.hr", Country: "HR", RateGroup: gvs, Description: "Platinum coin 1oz Koala", WeightGrams: oz, URL: "https://www.zlatosrebro.hr/1-unca-platinasti-koala.html"},
 }
 
 var (
