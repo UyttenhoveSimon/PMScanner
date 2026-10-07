@@ -1328,6 +1328,45 @@ var products = []scraper.Product{
 	// Shops that quote these without VAT; it is added when comparing.
 	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://ciode.es/producto/onza-plata-maple-leaf-2017-canada/"},
 	{Site: "tavast", Country: "EE", VAT: scraper.VATExcluded, Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://gold.tavast.eu/product/hobemunt-maple-leaf-1-oz-2016/"},
+
+	// Prices quoted without VAT, which is added when comparing, and other late additions
+	// Spain
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum bar 1oz Argor-Heraeus", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/platino-pt-y-paladio-pd/lingote-de-platino-de-una-onza-311-gramos-de-argor-heraeus-2/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/platino-pt-y-paladio-pd/moneda-onza-de-platino-maple-leaf-2022-canada/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum coin 1oz Philharmonic", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/platino-pt-y-paladio-pd/moneda-onza-de-platino-filarmonica-de-viena-2022-austria/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum coin 1oz Britannia", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/platino-pt-y-paladio-pd/moneda-de-platino-britannia-royal-mint-uk-de-1-oz-311-gramos/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum coin 1oz Eagle", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/platino-pt-y-paladio-pd/moneda-onza-de-platino-american-eagle-australia-2021/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/platino-pt-y-paladio-pd/moneda-de-onza-platino-canguro-2023australia/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Palladium bar 1oz Argor-Heraeus", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/platino-pt-y-paladio-pd/lingote-de-paladio-de-una-onza-311-gramos-de-argor-heraeus-2/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://www.comprarlingotes.com/tienda/plata/lingotes-de-plata/lingote-de-plata-de-1000g-de-la-refineria-suiza-argor-heraeus/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Heraeus", WeightGrams: kg, URL: "https://www.comprarlingotes.com/tienda/plata/lingotes-de-plata/lingote-de-plata-vertido-de-1kg-de-la-refineria-heraeus-alemania/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Germania Mint", WeightGrams: kg, URL: "https://www.comprarlingotes.com/tienda/plata/lingotes-de-plata/lingote-cast-bar-de-plata-germania-mint-de-1000-gramos-polonia/"},
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum bar 1oz Sempsa", WeightGrams: oz, URL: "https://ciode.es/producto/lingote-de-inversion-3110-grs-platino-marca-sempsa/"},
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum coin 1oz Kangaroo", WeightGrams: oz, URL: "https://ciode.es/producto/moneda-31-13-gramos-canguro-australia-100-dolares-ano-2025/"},
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Platinum coin 1oz Noble", WeightGrams: oz, URL: "https://ciode.es/producto/moneda-1-noble-31-10-gramos-platino-isla-de-man-varios-anos/"},
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://ciode.es/producto/lingote-de-plata-1-kilo-good-delivery/"},
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Sempsa", WeightGrams: kg, URL: "https://ciode.es/producto/lingote-de-plata-1000-grs/"},
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Sempsa Malta", WeightGrams: kg, URL: "https://ciode.es/producto/lingote-de-plata-1000-grs-malta-ano-2025-marca-sempsa/"},
+	{Site: "ciode", Country: "ES", VAT: scraper.VATExcluded, Description: "Copper bar 1kg Geiger", WeightGrams: kg, URL: "https://ciode.es/producto/lingote-de-cobre-1000-grs-varios-anos-marca-geiger-edelmetale-castillo-de-guldengossa/"},
+	// United Kingdom
+	{Site: "bleyer", Country: "GB", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Baird", WeightGrams: kg, URL: "https://www.bleyerbullion.co.uk/shop/silver/silver-bars/1kg-silver-baird-co-cast-bar/"},
+	{Site: "bleyer", Country: "GB", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Umicore", WeightGrams: kg, URL: "https://www.bleyerbullion.co.uk/shop/silver/silver-bars/1kg-silver-umicore-cast-bar/"},
+	{Site: "hattongardenmetals", Country: "GB", VAT: scraper.VATExcluded, Description: "Silver bar 1kg", WeightGrams: kg, Sources: cssOnly, Selectors: []string{`.price-block b`}, URL: "https://www.hattongardenmetals.com/1kg-silver-bar"},
+	{Site: "hattongardenmetals", Country: "GB", VAT: scraper.VATExcluded, Description: "Silver bar 1kg Metalor", WeightGrams: kg, Sources: cssOnly, Selectors: []string{`.price-block b`}, URL: "https://www.hattongardenmetals.com/1kg-silver-certified-metalor-bar"},
+	{Site: "baird", Country: "GB", VAT: scraper.VATExcluded, Description: "Palladium coin 1oz Maple Leaf", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`baird-price-tag.product-details__price`}, URL: "https://bairdmint.com/product/1oz-palladium-coin-maple-leaf-canada"},
+	// Ireland
+	{Site: "goldcore", Country: "IE", VAT: scraper.VATExcluded, Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://www.goldcore.ie/our-products/one-kilo-silver-bars"},
+	// Denmark
+	{Site: "nyfortuna", Country: "DK", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`p.price .woo-price-value .woocommerce-Price-amount`}, Currency: "DKK", URL: "https://nyfortuna.dk/produkt/soelvmapleleaf1oz/"},
+	// Belgium
+	{Site: "argentor", Country: "BE", Description: "Silver bar 1kg Emeko", WeightGrams: kg, URL: "https://www.argentorshop.be/nl/zilverstaaf-1-kilogram-emeko"},
+	{Site: "argentor", Country: "BE", Description: "Silver bar 1kg Heimerle + Meule", WeightGrams: kg, URL: "https://www.argentorshop.be/nl/zilverstaaf-1-kilogram-good-delivery-heimerle-meule"},
+	// Czech Republic
+	{Site: "zlataky", Country: "CZ", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`#hlavni_cena`}, Currency: "CZK", URL: "https://zlataky.cz/zlata-investicni-mince-maple-leaf-1-oz"},
+	{Site: "zlataky", Country: "CZ", Description: "Gold Philharmonic 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`#hlavni_cena`}, Currency: "CZK", URL: "https://zlataky.cz/zlata-investicni-mince-wiener-philharmoniker-1-oz"},
+	{Site: "zlataky", Country: "CZ", Description: "Gold Britannia 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`#hlavni_cena`}, Currency: "CZK", URL: "https://zlataky.cz/zlata-investicni-mince-britannia-1-oz"},
+	{Site: "zlataky", Country: "CZ", Description: "Gold Eagle 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`#hlavni_cena`}, Currency: "CZK", URL: "https://zlataky.cz/zlata-investicni-mince-american-eagle-1-oz-typ-2"},
+	{Site: "zlataky", Country: "CZ", Description: "Gold Kangaroo 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`#hlavni_cena`}, Currency: "CZK", URL: "https://zlataky.cz/zlata-investicni-mince-kangaroo-klokan-1-oz"},
 }
 
 var (
