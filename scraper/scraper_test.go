@@ -60,3 +60,27 @@ func TestRetryDelay(t *testing.T) {
 		}
 	}
 }
+
+func TestCurrencyIn(t *testing.T) {
+	cases := map[string]string{
+		"3 950,00 €":   "EUR",
+		"419 010 Руб.": "RUB",
+		"6 735 руб.":   "RUB",
+		"₼ 4,675.00":   "AZN",
+		"1 234":        "",
+	}
+	for in, want := range cases {
+		if got := currencyIn(in); got != want {
+			t.Errorf("currencyIn(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestExtractDefaultCurrency(t *testing.T) {
+	html := []byte(`<div class="p"><span>419 459</span></div>`)
+	p := Product{Selectors: []string{".p span"}, Sources: []Source{CSS}, Currency: "RUB"}
+	price, cur, err := extract(html, p)
+	if err != nil || price.String() != "419459" || cur != "RUB" {
+		t.Errorf("got %v %q %v", price, cur, err)
+	}
+}

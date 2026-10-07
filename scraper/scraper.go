@@ -51,6 +51,8 @@ type Product struct {
 	// Selectors are CSS selectors for the price element, tried in order, for
 	// shops without structured price data. The element text is the price.
 	Selectors []string
+	// Currency is used when the page gives a price without a currency.
+	Currency string
 	// Cookies are sent with the request, e.g. to pick the shop's currency.
 	Cookies map[string]string
 	// RateGroup makes shops that share a backend, and so a rate limit,
@@ -247,7 +249,11 @@ func extract(html []byte, p Product) (decimal.Decimal, string, error) {
 	}
 	for _, src := range sources {
 		if price, currency, ok := extractFrom(doc, src, p); ok {
-			return price, strings.TrimSpace(currency), nil
+			currency = strings.TrimSpace(currency)
+			if currency == "" {
+				currency = p.Currency
+			}
+			return price, currency, nil
 		}
 	}
 	return decimal.Zero, "", errNoPrice
@@ -304,7 +310,7 @@ func currencyIn(s string) string {
 		return "GBP"
 	case strings.Contains(s, "$"), strings.Contains(s, "USD"):
 		return "USD"
-	case strings.Contains(s, "₽"), strings.Contains(s, "RUB"), strings.Contains(s, "руб"):
+	case strings.Contains(s, "₽"), strings.Contains(s, "RUB"), strings.Contains(strings.ToLower(s), "руб"):
 		return "RUB"
 	case strings.Contains(s, "₸"), strings.Contains(s, "KZT"):
 		return "KZT"
