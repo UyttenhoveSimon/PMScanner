@@ -12,12 +12,16 @@ func TestWooCommerceURL(t *testing.T) {
 }
 
 func TestFromWooCommerce(t *testing.T) {
-	body := []byte(`[{"id":429,"prices":{"price":"360964","currency_code":"EUR","currency_minor_unit":2}}]`)
-	price, currency, err := fromWooCommerce(body)
+	body := []byte(`[{"id":429,"slug":"krugerrand","prices":{"price":"360964","currency_code":"EUR","currency_minor_unit":2}}]`)
+	price, currency, err := fromWooCommerce(body, "krugerrand")
 	if err != nil || price.String() != "3609.64" || currency != "EUR" {
 		t.Errorf("got %s %s %v, want 3609.64 EUR", price, currency, err)
 	}
-	if _, _, err := fromWooCommerce([]byte(`[]`)); err != errNoPrice {
+	if _, _, err := fromWooCommerce([]byte(`[]`), "krugerrand"); err != errNoPrice {
 		t.Errorf("empty list: got %v, want errNoPrice", err)
+	}
+	// Some shops ignore the slug filter and answer with another product.
+	if _, _, err := fromWooCommerce(body, "maple-leaf"); err != errNoPrice {
+		t.Errorf("other product: got %v, want errNoPrice", err)
 	}
 }

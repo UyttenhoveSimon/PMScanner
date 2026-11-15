@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/shopspring/decimal"
@@ -29,9 +30,8 @@ func apiURL(p Product) (string, error) {
 	}
 	switch p.API {
 	case WooCommerce:
-		slug := path.Base(strings.TrimSuffix(u.Path, "/"))
 		api := url.URL{Scheme: u.Scheme, Host: u.Host, Path: "/wp-json/wc/store/v1/products",
-			RawQuery: url.Values{"slug": {slug}}.Encode()}
+			RawQuery: url.Values{"slug": {wooSlug(p.URL)}}.Encode()}
 		return api.String(), nil
 	}
 	return "", fmt.Errorf("unknown API %q", p.API)
@@ -41,26 +41,43 @@ func apiURL(p Product) (string, error) {
 func fromAPI(body []byte, p Product) (decimal.Decimal, string, error) {
 	switch p.API {
 	case WooCommerce:
-		return fromWooCommerce(body)
+		return fromWooCommerce(body, wooSlug(p.URL))
 	}
 	return decimal.Zero, "", fmt.Errorf("unknown API %q", p.API)
 }
 
-func fromWooCommerce(body []byte) (decimal.Decimal, string, error) {
-	var products []struct {
-		Prices struct {
-			Price        string `json:"price"`
-			CurrencyCode string `json:"currency_code"`
-			MinorUnit    int32  `json:"currency_minor_unit"`
-		} `json:"prices"`
+// wooSlug is the product slug in a WooCommerce page URL: its last segment.
+func wooSlug(pageURL string) string {
+	u, err := url.Parse(pageURL)
+	if err != nil {
+		return ""
 	}
+	return path.Base(strings.TrimSuffix(u.Path, "/"))
+}
+
+// wooProduct is the part of a WooCommerce Store API product we read.
+type wooProduct struct {
+	Slug   string `json:"slug"`
+	Prices struct {
+		Price        string `json:"price"`
+		CurrencyCode string `json:"currency_code"`
+		MinorUnit    int32  `json:"currency_minor_unit"`
+	} `json:"prices"`
+}
+
+// fromWooCommerce reads the price of the product with the given slug. Some
+// shops ignore the slug filter and list other products, so the slug of the
+// answer is checked.
+func fromWooCommerce(body []byte, slug string) (decimal.Decimal, string, error) {
+	var products []wooProduct
 	if err := json.Unmarshal(body, &products); err != nil {
 		return decimal.Zero, "", fmt.Errorf("parse: %w", err)
 	}
-	if len(products) == 0 {
+	i := slices.IndexFunc(products, func(p wooProduct) bool { return strings.EqualFold(p.Slug, slug) })
+	if i < 0 {
 		return decimal.Zero, "", errNoPrice
 	}
-	pr := products[0].Prices
+	pr := products[i].Prices
 	minor, err := decimal.NewFromString(pr.Price)
 	if err != nil || !minor.IsPositive() {
 		return decimal.Zero, "", errNoPrice
