@@ -22,7 +22,7 @@ var (
 // data (JSON-LD, microdata or Open Graph) works without site-specific code.
 //
 // Browser: true marks shops behind a bot challenge (goldavenue: Vercel; the
-// gvs shops: a proof-of-work page) or that refuse plain HTTP (esg, centerzlata);
+// gvs shops: a proof-of-work page) or that refuse plain HTTP (esg);
 // they need a Chromium-based browser installed.
 var products = []scraper.Product{
 	{Site: "or.fr", Country: "FR", Description: "Gold bar 1kg Valcambi", WeightGrams: kg,
@@ -309,9 +309,9 @@ var products = []scraper.Product{
 	{Site: "kdggold", Country: "CY", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.kdggold.com/en/gold-coins/canadian-maple-leaf-1-oz-2026-gold/"},
 
 	// Slovenia
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Gold bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://centerzlata.com/izdelek/argor-heraeus-zlata-palica-od-1-kg/"},
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://centerzlata.com/izdelek/krugerrand-1-unca-zlati-kovanec/"},
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://centerzlata.com/izdelek/gold-maple-leaf-1-unca/"},
+	{Site: "centerzlata", Country: "SI", API: scraper.WooCommerce, Description: "Gold bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://centerzlata.com/izdelek/argor-heraeus-zlata-palica-od-1-kg/"},
+	{Site: "centerzlata", Country: "SI", API: scraper.WooCommerce, Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://centerzlata.com/izdelek/krugerrand-1-unca-zlati-kovanec/"},
+	{Site: "centerzlata", Country: "SI", API: scraper.WooCommerce, Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://centerzlata.com/izdelek/gold-maple-leaf-1-unca/"},
 	{Site: "goldstore.si", Country: "SI", Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://goldstore.si/prodaja/zlate-palice/1000-g-zlate-palice"},
 	{Site: "goldstore.si", Country: "SI", Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://goldstore.si/prodaja/zlati-kovanci/juzna-afrika/krugerrand-1-oz"},
 	{Site: "goldstore.si", Country: "SI", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://goldstore.si/prodaja/zlati-kovanci/kanada/kanadski-javorjev-list-1oz"},
@@ -798,10 +798,10 @@ var products = []scraper.Product{
 	{Site: "kdggold", Country: "CY", Description: "Gold Eagle 1oz", WeightGrams: oz, URL: "https://www.kdggold.com/en/gold-coins/gold-coin-american-eagle-1oz-mix-years/"},
 	{Site: "kdggold", Country: "CY", Description: "Gold Kangaroo 1oz", WeightGrams: oz, URL: "https://www.kdggold.com/en/gold-coins/gold-coin-australian-kangaroo-1-oz-2026/"},
 	// Slovenia
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Gold Vreneli 20 CHF", WeightGrams: vreneli, URL: "https://centerzlata.com/izdelek/20-frankov-helvetia/"},
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Gold Napoleon 20 FF", WeightGrams: napoleon, URL: "https://centerzlata.com/izdelek/20-frankov-angel/"},
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Gold Sovereign", WeightGrams: sovereign, URL: "https://centerzlata.com/izdelek/britanski-sovereign/"},
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Gold Philharmonic 1oz", WeightGrams: oz, URL: "https://centerzlata.com/izdelek/zlati-filharmoniki-1-unca/"},
+	{Site: "centerzlata", Country: "SI", API: scraper.WooCommerce, Description: "Gold Vreneli 20 CHF", WeightGrams: vreneli, URL: "https://centerzlata.com/izdelek/20-frankov-helvetia/"},
+	{Site: "centerzlata", Country: "SI", API: scraper.WooCommerce, Description: "Gold Napoleon 20 FF", WeightGrams: napoleon, URL: "https://centerzlata.com/izdelek/20-frankov-angel/"},
+	{Site: "centerzlata", Country: "SI", API: scraper.WooCommerce, Description: "Gold Sovereign", WeightGrams: sovereign, URL: "https://centerzlata.com/izdelek/britanski-sovereign/"},
+	{Site: "centerzlata", Country: "SI", API: scraper.WooCommerce, Description: "Gold Philharmonic 1oz", WeightGrams: oz, URL: "https://centerzlata.com/izdelek/zlati-filharmoniki-1-unca/"},
 	{Site: "goldstore.si", Country: "SI", Description: "Gold Vreneli 20 CHF", WeightGrams: vreneli, URL: "https://goldstore.si/prodaja/zlati-kovanci/ostali-kovanci/svicarski-vreneli-20-fr"},
 	{Site: "goldstore.si", Country: "SI", Description: "Gold Napoleon 20 FF", WeightGrams: napoleon, URL: "https://goldstore.si/prodaja/zlati-kovanci/francija/marianne-petelin-20-frfs"},
 	{Site: "goldstore.si", Country: "SI", Description: "Gold Sovereign", WeightGrams: sovereign, URL: "https://goldstore.si/prodaja/zlati-kovanci/velika-britanija/1-english-pound-1957-1968"},
@@ -1200,7 +1200,7 @@ var products = []scraper.Product{
 	{Site: "xrisos.gr", Country: "GR", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://xrisos.gr/products/silver-bar-1000g"},
 	{Site: "xrisos.gr", Country: "GR", Description: "Platinum coin 1oz Maple Leaf", WeightGrams: oz, URL: "https://xrisos.gr/products/platinum-coin-maple-leaf-1-oz"},
 	// Slovenia
-	{Site: "centerzlata", Country: "SI", Browser: true, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://centerzlata.com/izdelek/1000g-srebra-argor-heraeus-2/"},
+	{Site: "centerzlata", Country: "SI", VAT: scraper.VATExcluded, API: scraper.WooCommerce, Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://centerzlata.com/izdelek/1000g-srebra-argor-heraeus-2/"},
 	{Site: "hisazlata", Country: "SI", Description: "Silver bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://hisazlata.com/izdelek/srebrna-palica-1000-g-argor-heraeus/"},
 	{Site: "zlatopoposti", Country: "SI", Description: "Silver bar 1kg", WeightGrams: kg, Sources: cssOnly, Selectors: []string{"p.price .woocommerce-Price-amount"}, URL: "https://zlatopoposti.si/izdelek/1000g-srebrna-palica/"},
 	// Croatia
