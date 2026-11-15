@@ -99,7 +99,7 @@ func scan() []entry {
 				e.Err = err
 			default:
 				// Compare prices as paid: add VAT to prices quoted without it.
-				e.EURPerGram, _ = withVAT(eur, vatOf(r.Product), r.Country)
+				e.EURPerGram, _ = withVAT(eur, vatFor(r.Product, r.Currency), r.Country)
 			}
 		}
 		entries[i] = e
@@ -119,7 +119,7 @@ func toPrices(entries []entry) []store.Price {
 	prices := make([]store.Price, len(entries))
 	for i, e := range entries {
 		p := store.Price{
-			Site: e.Site, Country: e.Country, VAT: string(vatOf(e.Product)), Category: categoryOf(e.Description), Description: e.Description, URL: e.URL,
+			Site: e.Site, Country: e.Country, VAT: string(vatFor(e.Product, e.Currency)), Category: categoryOf(e.Description), Description: e.Description, URL: e.URL,
 			Price: e.Price, Currency: e.Currency, EURPerGram: e.EURPerGram,
 		}
 		if e.Err != nil {

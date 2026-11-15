@@ -148,6 +148,7 @@ pure gold. If the price doesn't come out right, these options help:
 | `RateGroup` | Several shops share one backend, and so one rate limit                    |
 | `VAT`       | The price isn't the default for its metal: `VATMargin`, `VATExcluded` (VAT is added when comparing) or `VATFree` |
 | `Currency`  | The page shows prices without a currency                                  |
+| `ExportCurrency` | The shop quotes visitors from other regions in this currency, without VAT (e.g. suissegold: USD outside Europe) |
 
 ## Taxes
 

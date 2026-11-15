@@ -84,6 +84,16 @@ func vatOf(p scraper.Product) scraper.VAT {
 	return scraper.VATIncluded
 }
 
+// vatFor is vatOf for a price quoted in the given currency: a shop's
+// ExportCurrency carries no VAT.
+func vatFor(p scraper.Product, currency string) scraper.VAT {
+	vat := vatOf(p)
+	if vat == scraper.VATIncluded && p.ExportCurrency != "" && currency == p.ExportCurrency {
+		return scraper.VATExcluded
+	}
+	return vat
+}
+
 // vatLabels are shown next to prices.
 var vatLabels = map[scraper.VAT]string{
 	scraper.VATExempt:   "VAT exempt",
@@ -113,7 +123,7 @@ func savedVAT(p store.Price) scraper.VAT {
 		return scraper.VAT(p.VAT)
 	}
 	if prod, ok := productByURL[p.URL]; ok {
-		return vatOf(prod)
+		return vatFor(prod, p.Currency)
 	}
 	return vatOf(scraper.Product{Description: p.Description})
 }

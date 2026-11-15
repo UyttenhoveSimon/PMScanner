@@ -55,6 +55,9 @@ type Product struct {
 	VAT VAT
 	// API reads the price from the shop's JSON API instead of the page.
 	API API
+	// ExportCurrency is the currency the shop quotes to visitors from outside
+	// its region, without VAT; prices in it count as VATExcluded.
+	ExportCurrency string
 	// Currency is used when the page gives a price without a currency.
 	Currency string
 	// Cookies are sent with the request, e.g. to pick the shop's currency.
