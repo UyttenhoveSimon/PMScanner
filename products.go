@@ -1235,7 +1235,7 @@ var products = []scraper.Product{
 	{Site: "goldengate", Country: "CZ", Description: "Silver bar 1kg", WeightGrams: kg, URL: "https://eshop.goldengate.cz/products/stribrny-slitek-1-kg"},
 	{Site: "goldengate", Country: "CZ", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, URL: "https://eshop.goldengate.cz/products/platinovy-slitek-1-oz-valcambi"},
 	{Site: "auportal", Country: "CZ", Description: "Silver bar 1kg Valcambi", WeightGrams: kg, URL: "https://www.auportal.cz/investicni-stribro-stribrny-slitek-1000g-valcambi-sa_z3677/"},
-	{Site: "bessergold", Country: "CZ", Description: "Silver bar 1kg Bessergold", WeightGrams: kg, URL: "https://www.bessergold.cz/cs/investicni-stribro/stribrne-slitky-cihly-prodej-praha/stribrne-slitky-1000g/bessergold-stribrny-slitek-1000-g.html"},
+	{Site: "bessergold", Country: "CZ", API: scraper.Magento, Description: "Silver bar 1kg Bessergold", WeightGrams: kg, URL: "https://www.bessergold.cz/cs/investicni-stribro/stribrne-slitky-cihly-prodej-praha/stribrne-slitky-1000g/bessergold-stribrny-slitek-1000-g.html"},
 	// Slovakia
 	{Site: "zlatypristav", Country: "SK", Description: "Platinum bar 1oz Valcambi", WeightGrams: oz, Sources: cssOnly, Selectors: []string{"span.product_price .woocommerce-Price-amount"}, URL: "https://zlatypristav.sk/obchod/platina-vco/valcambi-1-oz-platinum/"},
 	// Hungary
@@ -1360,8 +1360,8 @@ var products = []scraper.Product{
 	// Denmark
 	{Site: "nyfortuna", Country: "DK", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`p.price .woo-price-value .woocommerce-Price-amount`}, Currency: "DKK", URL: "https://nyfortuna.dk/produkt/soelvmapleleaf1oz/"},
 	// Belgium
-	{Site: "argentor", Country: "BE", Description: "Silver bar 1kg Emeko", WeightGrams: kg, URL: "https://www.argentorshop.be/nl/zilverstaaf-1-kilogram-emeko"},
-	{Site: "argentor", Country: "BE", Description: "Silver bar 1kg Heimerle + Meule", WeightGrams: kg, URL: "https://www.argentorshop.be/nl/zilverstaaf-1-kilogram-good-delivery-heimerle-meule"},
+	{Site: "argentor", Country: "BE", API: scraper.Magento, Description: "Silver bar 1kg Emeko", WeightGrams: kg, URL: "https://www.argentorshop.be/nl/zilverstaaf-1-kilogram-emeko"},
+	{Site: "argentor", Country: "BE", API: scraper.Magento, Description: "Silver bar 1kg Heimerle + Meule", WeightGrams: kg, URL: "https://www.argentorshop.be/nl/zilverstaaf-1-kilogram-good-delivery-heimerle-meule"},
 	// Czech Republic
 	{Site: "zlataky", Country: "CZ", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`#hlavni_cena`}, Currency: "CZK", URL: "https://zlataky.cz/zlata-investicni-mince-maple-leaf-1-oz"},
 	{Site: "zlataky", Country: "CZ", Description: "Gold Philharmonic 1oz", WeightGrams: oz, Sources: cssOnly, Selectors: []string{`#hlavni_cena`}, Currency: "CZK", URL: "https://zlataky.cz/zlata-investicni-mince-wiener-philharmoniker-1-oz"},
