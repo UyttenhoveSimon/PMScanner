@@ -114,6 +114,15 @@ func hostOf(rawURL string) string {
 	return strings.TrimPrefix(u.Hostname(), "www.")
 }
 
+// rateKey names the request limit a product counts against: its RateGroup,
+// or else its host.
+func rateKey(p Product) string {
+	if p.RateGroup != "" {
+		return p.RateGroup
+	}
+	return hostOf(p.URL)
+}
+
 // hostState limits concurrent requests to one shop and remembers when it
 // timed out, so its other products fail fast instead of waiting too.
 type hostState struct {
@@ -149,10 +158,7 @@ func Scrape(products []Product) []Result {
 			browserIdx = append(browserIdx, i)
 			continue
 		}
-		key := p.RateGroup
-		if key == "" {
-			key = hostOf(p.URL)
-		}
+		key := rateKey(p)
 		host := hosts[key]
 		if host == nil {
 			host = &hostState{slots: make(chan struct{}, maxRequestsPerHost)}

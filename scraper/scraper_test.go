@@ -47,6 +47,15 @@ func TestHostOf(t *testing.T) {
 	}
 }
 
+func TestRateKey(t *testing.T) {
+	if got := rateKey(Product{URL: "https://www.gvs.ee/x", RateGroup: "gvs"}); got != "gvs" {
+		t.Errorf("with RateGroup: got %q, want %q", got, "gvs")
+	}
+	if got := rateKey(Product{URL: "https://www.gvs.ee/x"}); got != "gvs.ee" {
+		t.Errorf("without RateGroup: got %q, want %q", got, "gvs.ee")
+	}
+}
+
 func TestRetryDelay(t *testing.T) {
 	cases := map[string]time.Duration{
 		"":                              3 * time.Second,

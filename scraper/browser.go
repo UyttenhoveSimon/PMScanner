@@ -80,10 +80,20 @@ func scrapeBrowser(results []Result, indexes []int) {
 
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, browserTabs)
+	groups := map[string]chan struct{}{}
 	for _, i := range indexes {
+		key := rateKey(results[i].Product)
+		group := groups[key]
+		if group == nil {
+			group = make(chan struct{}, maxRequestsPerHost)
+			groups[key] = group
+		}
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			// Take the group slot first so a busy shop never holds a tab.
+			group <- struct{}{}
+			defer func() { <-group }()
 			sem <- struct{}{}
 			defer func() { <-sem }()
 			tctx, cancel := chromedp.NewContext(bctx)
