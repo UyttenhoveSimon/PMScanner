@@ -280,7 +280,7 @@ var products = []scraper.Product{
 	{Site: "orohispanica", Country: "ES", API: scraper.WooCommerce, Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.orohispanica.es/tienda/monedas-de-oro/moneda-maple-leaf-1-oz-oro-puro/"},
 	{Site: "comprarlingotes", Country: "ES", Description: "Gold bar 1kg Argor-Heraeus", WeightGrams: kg, URL: "https://www.comprarlingotes.com/tienda/oro/lingotes-de-oro/lingote-de-oro-de-1000-gramos-1-kg-de-argor-heraeus/"},
 	{Site: "comprarlingotes", Country: "ES", Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/oro/monedas-de-oro/moneda-maple-leaf-canadiense-de-oro-1-oz/"},
-	{Site: "comprarlingotes", Country: "ES", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/plata/monedas-de-plata/moneda-maple-leaf-de-1-onza-de-plata-2019/"},
+	{Site: "comprarlingotes", Country: "ES", VAT: scraper.VATExcluded, Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.comprarlingotes.com/tienda/plata/monedas-de-plata/moneda-maple-leaf-de-1-onza-de-plata-2019/"},
 	{Site: "ciode", Country: "ES", API: scraper.WooCommerce, Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://ciode.es/producto/lingote-de-oro-1000-grs/"},
 	{Site: "ciode", Country: "ES", API: scraper.WooCommerce, Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://ciode.es/producto/krugerrand-sudafrica-1-oz-oro-varios-a-os/"},
 	{Site: "ciode", Country: "ES", API: scraper.WooCommerce, Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://ciode.es/producto/maple-oro-50-canada-31-10-grs-varios-a-os-2/"},
@@ -319,10 +319,10 @@ var products = []scraper.Product{
 	{Site: "zlatopoposti", Country: "SI", API: scraper.WooCommerce, Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://zlatopoposti.si/izdelek/1000-g-zlata-palica/"},
 	{Site: "zlatopoposti", Country: "SI", API: scraper.WooCommerce, Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://zlatopoposti.si/izdelek/krugerrand-zlatnik-1-oz/"},
 	{Site: "zlatopoposti", Country: "SI", API: scraper.WooCommerce, Description: "Gold Maple Leaf 1oz", WeightGrams: oz, URL: "https://zlatopoposti.si/izdelek/javorjev-list-zlati-1-oz/"},
-	{Site: "zlatopoposti", Country: "SI", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://zlatopoposti.si/izdelek/javorjev-list-srebrni-1-unca/"},
+	{Site: "zlatopoposti", Country: "SI", API: scraper.WooCommerce, Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://zlatopoposti.si/izdelek/javorjev-list-srebrni-1-unca/"},
 	{Site: "svetplemenitihkovin", Country: "SI", API: scraper.WooCommerce, Description: "Gold bar 1kg", WeightGrams: kg, URL: "https://www.svetplemenitihkovin.si/shop/zlate-palice/zlata-palica-1000g/"},
 	{Site: "svetplemenitihkovin", Country: "SI", API: scraper.WooCommerce, Description: "Gold Krugerrand 1oz", WeightGrams: oz, URL: "https://www.svetplemenitihkovin.si/shop/afriski-krugerrand/33931-g-zlati-juznoafriski-krugerrand/"},
-	{Site: "svetplemenitihkovin", Country: "SI", Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.svetplemenitihkovin.si/shop/kanadski-list1/3110g-srebrni-kanadski-javorjev-list/"},
+	{Site: "svetplemenitihkovin", Country: "SI", API: scraper.WooCommerce, Description: "Silver Maple Leaf 1oz", WeightGrams: oz, URL: "https://www.svetplemenitihkovin.si/shop/kanadski-list1/3110g-srebrni-kanadski-javorjev-list/"},
 
 	// Croatia
 	{Site: "zlatosrebro.hr", Country: "HR", Browser: true, RateGroup: gvs, Description: "Gold bar 1kg Heraeus (bonded warehouse)", WeightGrams: kg, URL: "https://www.zlatosrebro.hr/1-kg-zlatna-poluga-heraeus-u-bescarinskom-skladistu.html"},
