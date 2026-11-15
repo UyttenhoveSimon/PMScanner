@@ -144,6 +144,8 @@ pure gold. If the price doesn't come out right, these options help:
 | `Selectors` | The shop has no structured data; give CSS selectors for the price element  |
 | `Cookies`   | The shop needs a cookie, e.g. to show prices in EUR                        |
 | `Browser`   | The shop blocks plain HTTP clients with a JavaScript challenge            |
+| `API`       | The shop's JSON API gives the right price: `WooCommerce` (Store API, looked up by the page's slug) or `Magento` (GraphQL, looked up by the page's url_key) |
+| `RateGroup` | Several shops share one backend, and so one rate limit                    |
 | `VAT`       | The price isn't the default for its metal: `VATMargin`, `VATExcluded` (VAT is added when comparing) or `VATFree` |
 | `Currency`  | The page shows prices without a currency                                  |
 
@@ -165,7 +167,8 @@ the source of every currency it offers.
 
 ## How it works
 
-For each product page, PMScanner tries these sources in order and keeps the first price found:
+A product with `API` set is read from the shop's JSON API instead of its page.
+For every other product page, PMScanner tries these sources in order and keeps the first price found:
 
 1. `Selectors`, if the product defines any
 2. JSON-LD: `<script type="application/ld+json">` with a schema.org `Offer`
@@ -181,6 +184,45 @@ For each product page, PMScanner tries these sources in order and keeps the firs
 ├── fx/              # conversion to euros with ECB reference rates
 └── store/           # SQLite storage of every scan
 ```
+
+## For shop owners
+
+If you run one of the listed shops, this is what PMScanner does on your site and why.
+
+**What is fetched.** One product page per listed product, once a day (05:00 UTC,
+from GitHub Actions), plus any manual scans. No search, category or cart pages, no
+crawling, no accounts. The price is read from the schema.org data (JSON-LD,
+microdata, Open Graph) that shops publish for search engines.
+
+**How gently.** At most 2 pages of a shop are fetched at the same time, and shops
+that run on one backend (e.g. the Goldvorsorge group) share those 2. A request
+answered with HTTP 429 is retried at most twice, after the delay given in
+`Retry-After` (capped at 15 s). If a shop times out, its remaining pages are
+skipped for that scan. Requests carry a regular desktop browser user agent.
+
+**Why your pages and not your API.** We prefer a JSON API when it is open and
+gives the same price as the page: one small JSON answer is lighter for a shop than
+a full page. A survey in November 2026 found:
+
+- **WooCommerce Store API** (`/wp-json/wc/store/v1/products?slug=…`): 31 shops
+  answer it. For 25 of them, every product the API found matched the page price.
+  The others don't fit as a drop-in replacement: one ignores the `slug` filter and
+  returns the same product for every request; on some, the API leaves VAT out
+  where the page includes it (or the other way round); and some products the page
+  shows are missing from the API.
+- **Magento GraphQL** (`/graphql`): 4 shops really run it. 2 return prices that
+  match the page exactly, and are now read through it (argentor, bessergold);
+  on 1, no product matches the names used in our page URLs; and 1 answers with
+  an error because its search index isn't built.
+
+Shops read through an API: centerzlata (WooCommerce Store API; its page refuses
+plain HTTP clients), argentor and bessergold (Magento GraphQL). Every other shop
+is read from its product page, because the API was missing, wrong, or not tried. A shop listed with `Browser: true` refuses plain HTTP
+clients (a JavaScript challenge or HTTP 403), so its pages are loaded in a
+headless browser, at the same 2 pages at a time.
+
+**Opting out or changing how we fetch.** Open an issue: we will remove your shop,
+lower the rate, or switch to an endpoint you prefer, such as a price feed or API.
 
 ## Contributing
 
