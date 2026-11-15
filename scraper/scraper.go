@@ -53,6 +53,8 @@ type Product struct {
 	Selectors []string
 	// VAT says how the price is taxed; empty means the default for the metal.
 	VAT VAT
+	// API reads the price from the shop's JSON API instead of the page.
+	API API
 	// Currency is used when the page gives a price without a currency.
 	Currency string
 	// Cookies are sent with the request, e.g. to pick the shop's currency.
@@ -203,7 +205,14 @@ const maxRetries = 2
 
 func scrapeHTTP(p Product) (decimal.Decimal, string, error) {
 	for attempt := 0; ; attempt++ {
-		body, retryAfter, err := fetch(p)
+		target := p.URL
+		if p.API != "" {
+			var err error
+			if target, err = apiURL(p); err != nil {
+				return decimal.Zero, "", err
+			}
+		}
+		body, retryAfter, err := fetch(p, target)
 		if retryAfter > 0 && attempt < maxRetries {
 			time.Sleep(retryAfter)
 			continue
@@ -211,14 +220,17 @@ func scrapeHTTP(p Product) (decimal.Decimal, string, error) {
 		if err != nil {
 			return decimal.Zero, "", err
 		}
+		if p.API != "" {
+			return fromAPI(body, p)
+		}
 		return extract(body, p)
 	}
 }
 
-// fetch gets a product page. When the shop rate-limits the request, it also
+// fetch gets a product page, or the API request standing for it. When the shop rate-limits the request, it also
 // returns how long to wait before trying again.
-func fetch(p Product) (body []byte, retryAfter time.Duration, err error) {
-	req, err := http.NewRequest("GET", p.URL, nil)
+func fetch(p Product, target string) (body []byte, retryAfter time.Duration, err error) {
+	req, err := http.NewRequest("GET", target, nil)
 	if err != nil {
 		return nil, 0, err
 	}
