@@ -215,9 +215,10 @@ a full page. A survey in November 2026 found:
   on 1, no product matches the names used in our page URLs; and 1 answers with
   an error because its search index isn't built.
 
-Shops read through an API: centerzlata (WooCommerce Store API; its page refuses
-plain HTTP clients), argentor and bessergold (Magento GraphQL). Every other shop
-is read from its product page, because the API was missing, wrong, or not tried. A shop listed with `Browser: true` refuses plain HTTP
+So a product is read through the API when the API gives the same price as its
+page: about 215 products from 29 WooCommerce shops, and argentor and bessergold
+through Magento GraphQL. Products the API lacks or prices differently, and every
+other shop, are read from the product page. A shop listed with `Browser: true` refuses plain HTTP
 clients (a JavaScript challenge or HTTP 403), so its pages are loaded in a
 headless browser, at the same 2 pages at a time.
 
