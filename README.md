@@ -228,7 +228,8 @@ lower the rate, or switch to an endpoint you prefer, such as a price feed or API
 
 ## Contributing
 
-Issues and pull requests are welcome, especially new dealers. Before opening a PR:
+Issues and pull requests are welcome, especially new dealers. Known per-shop
+quirks, VAT checks and open issues are in [`docs/NOTES.md`](docs/NOTES.md). Before opening a PR:
 
 ```sh
 gofmt -l . && go vet ./... && go test ./...
