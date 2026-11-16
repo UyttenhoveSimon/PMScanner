@@ -1,23 +1,57 @@
-# PMScanner
+<div align="center">
 
-[![CI](https://github.com/UyttenhoveSimon/PMScanner/actions/workflows/ci.yml/badge.svg)](https://github.com/UyttenhoveSimon/PMScanner/actions/workflows/ci.yml)
-[![Go](https://img.shields.io/github/go-mod/go-version/UyttenhoveSimon/PMScanner)](go.mod)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+# PMScanner
 
 **Compare precious-metal prices across European bullion dealers, ranked by price per gram.**
 
-PMScanner scrapes gold and silver product pages from many dealers at once and tells
-you who sells cheapest, either as a terminal table or as a small self-hosted web page.
+[![CI](https://github.com/UyttenhoveSimon/PMScanner/actions/workflows/ci.yml/badge.svg)](https://github.com/UyttenhoveSimon/PMScanner/actions/workflows/ci.yml)
+[![Daily scan](https://github.com/UyttenhoveSimon/PMScanner/actions/workflows/pages.yml/badge.svg)](https://github.com/UyttenhoveSimon/PMScanner/actions/workflows/pages.yml)
+[![Go](https://img.shields.io/github/go-mod/go-version/UyttenhoveSimon/PMScanner)](go.mod)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**[Live prices](https://uyttenhovesimon.github.io/PMScanner/)** ·
+[Quick start](#quick-start) ·
+[Adding a shop](#adding-a-shop) ·
+[For shop owners](#for-shop-owners) ·
+[Contributing](#contributing)
 
 ![PMScanner web page: 1 kg gold bars from European dealers ranked by euros per gram, with type, country and currency filters](docs/screenshot.png)
 
-```
+</div>
+
+PMScanner scrapes gold and silver product pages from **119 dealers in 32 countries**
+(over 1,100 products) and tells you who sells cheapest, as a terminal table, a
+self-hosted web page, or a static site refreshed daily on
+[GitHub Pages](https://uyttenhovesimon.github.io/PMScanner/).
+
+```console
+$ go run .
 SITE           PRODUCT                PRICE          PER GRAM  URL
 or.fr          Gold bar 1kg Valcambi  119856.23 EUR  119.86    https://or.fr/achat/or/lingots/...
 hollandgold    Gold bar 1kg Heraeus   119989.86 EUR  119.99    https://www.hollandgold.nl/...
 stonexbullion  Gold Krugerrand 1oz    3730.60 EUR    119.94    https://stonexbullion.com/fr/...
 ...
 ```
+
+<details>
+<summary><strong>Table of contents</strong></summary>
+
+- [Features](#features)
+- [Quick start](#quick-start)
+  - [Build a binary](#build-a-binary)
+  - [Web page](#web-page)
+  - [Static site and GitHub Pages](#static-site-and-github-pages)
+  - [Browser mode](#browser-mode)
+- [Adding a shop](#adding-a-shop)
+- [Taxes](#taxes)
+- [Exchange rates](#exchange-rates)
+- [How it works](#how-it-works)
+- [For shop owners](#for-shop-owners)
+- [Contributing](#contributing)
+- [Disclaimer](#disclaimer)
+- [License](#license)
+
+</details>
 
 ## Features
 
@@ -178,12 +212,17 @@ For every other product page, PMScanner tries these sources in order and keeps t
 
 ```
 .
-├── main.go          # CLI: scan and print the table
-├── web.go, web.html # -serve: web page and JSON API
-├── products.go      # the list of shops and products
-├── scraper/         # fetching (HTTP or headless browser) and price extraction
-├── fx/              # conversion to euros with ECB reference rates
-└── store/           # SQLite storage of every scan
+├── main.go            # CLI: scan and print the table
+├── products.go        # the list of shops and products
+├── page.go, web.html  # the web page (embedded) and product categories
+├── web.go             # -serve: web server and JSON API
+├── export.go          # -export: static copy of the site
+├── history.go         # -history: scans as compressed JSON files
+├── tax.go             # VAT rules per country
+├── scraper/           # fetching (HTTP, JSON API or headless browser) and price extraction
+├── fx/                # conversion to euros with ECB reference rates
+├── store/             # SQLite storage of every scan
+└── data/scans/        # every published scan
 ```
 
 ## For shop owners
@@ -201,7 +240,10 @@ answered with HTTP 429 is retried at most twice, after the delay given in
 `Retry-After` (capped at 15 s). If a shop times out, its remaining pages are
 skipped for that scan. Requests carry a regular desktop browser user agent.
 
-**Why your pages and not your API.** We prefer a JSON API when it is open and
+<details>
+<summary><strong>Why your pages and not your API</strong></summary>
+
+We prefer a JSON API when it is open and
 gives the same price as the page: one small JSON answer is lighter for a shop than
 a full page. A survey in November 2026 found:
 
@@ -223,12 +265,14 @@ other shop, are read from the product page. A shop listed with `Browser: true` r
 clients (a JavaScript challenge or HTTP 403), so its pages are loaded in a
 headless browser, at the same 2 pages at a time.
 
+</details>
+
 **Opting out or changing how we fetch.** Open an issue: we will remove your shop,
 lower the rate, or switch to an endpoint you prefer, such as a price feed or API.
 
 ## Contributing
 
-Issues and pull requests are welcome, especially new dealers. Known per-shop
+Issues and pull requests are welcome, especially new dealers ([how to add one](#adding-a-shop)). Known per-shop
 quirks, VAT checks and open issues are in [`docs/NOTES.md`](docs/NOTES.md). Before opening a PR:
 
 ```sh
@@ -242,4 +286,4 @@ dealer's site before buying. Respect each site's terms of use.
 
 ## License
 
-[MIT](LICENSE)
+Released under the [MIT License](LICENSE).
