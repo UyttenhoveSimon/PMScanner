@@ -4,8 +4,8 @@ go 1.27
 
 require (
 	github.com/PuerkitoBio/goquery v1.13.0
-	github.com/chromedp/cdproto v0.159.2
-	github.com/chromedp/chromedp v0.23.0
+	github.com/chromedp/cdproto v0.160.3
+	github.com/chromedp/chromedp v0.23.1
 	github.com/shopspring/decimal v1.6.0
 	modernc.org/sqlite v1.62.0
 )
