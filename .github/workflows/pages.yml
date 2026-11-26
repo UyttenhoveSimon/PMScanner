@@ -58,13 +58,16 @@ jobs:
 
       - name: Commit the scan
         if: steps.scan.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }} # checkout keeps no credentials
         run: |
           git add data/scans
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
               commit -q -m "Add scanned prices" || exit 0
-          git pull -q --rebase origin main
-          git push -q origin HEAD:main
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git pull -q --rebase "$remote" main
+          git push -q "$remote" HEAD:main
 
       - name: Export the page
         run: ./pmscanner -db "$RUNNER_TEMP/pmscanner.db" -history data/scans -export site
