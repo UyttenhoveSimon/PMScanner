@@ -16,10 +16,7 @@ on:
   push:
     branches: [main] # republish page changes and locally made scans
 
-permissions:
-  contents: write # commit new scans to main
-  pages: write
-  id-token: write
+permissions: {}
 
 concurrency:
   group: pages
@@ -27,6 +24,10 @@ concurrency:
 
 jobs:
   publish:
+    permissions:
+      contents: write # commit new scans to main
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: github-pages
