@@ -170,6 +170,8 @@ type pageData struct {
 	// Currencies in the menu by rate source, for the exchange rate note.
 	ECBCurrencies, FallbackCurrencies []string
 	Failed                            []row
+	Shops                             int    // shops with at least one price
+	Canonical                         string // absolute URL, set for the published latest scan
 	Scanned                           string
 	Scanning                          bool
 	IsLatest                          bool
@@ -209,7 +211,7 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates, origins fx.Or
 	for i := range data.Groups {
 		byName[data.Groups[i].Name] = &data.Groups[i]
 	}
-	countries := map[string]bool{}
+	countries, shops := map[string]bool{}, map[string]bool{}
 	// Prices are saved sorted by price per gram.
 	for _, p := range prices {
 		country := p.Country
@@ -228,6 +230,7 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates, origins fx.Or
 		if country != "" {
 			countries[country] = true
 		}
+		shops[p.Site] = true
 		g, ok := byName[p.Category]
 		if !ok {
 			g = byName[otherCategory]
@@ -235,6 +238,7 @@ func buildPage(db *store.Store, id int64, l links, rates fx.Rates, origins fx.Or
 		rw.Best = len(g.Rows) == 0
 		g.Rows = append(g.Rows, rw)
 	}
+	data.Shops = len(shops)
 	for c := range countries {
 		data.Countries = append(data.Countries, c)
 	}

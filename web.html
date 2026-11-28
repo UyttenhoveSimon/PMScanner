@@ -3,7 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PM Scanner</title>
+<title>PM Scanner: gold and silver prices per gram from European bullion dealers</title>
+<meta name="description" content="Compare gold, silver, platinum and palladium bar and coin prices from {{.Shops}} bullion dealers in {{len .Countries}} countries, ranked by price per gram with VAT included. Scanned every day.">
+{{if .Canonical}}<link rel="canonical" href="{{.Canonical}}">
+<meta property="og:url" content="{{.Canonical}}">{{end}}
+{{if not .IsLatest}}<meta name="robots" content="noindex, follow">{{end}}
+<meta property="og:type" content="website">
+<meta property="og:title" content="PM Scanner: cheapest gold and silver per gram in Europe">
+<meta property="og:description" content="Gold, silver, platinum and palladium prices from {{.Shops}} European bullion dealers, ranked by price per gram. Scanned every day.">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@graph": [
+  {"@type": "WebSite", "name": "PM Scanner", "url": "https://uyttenhovesimon.github.io/PMScanner/",
+   "description": "Gold and silver bar and coin prices from European bullion dealers, ranked by price per gram."},
+  {"@type": "Dataset", "name": "Daily precious-metal prices from European bullion dealers",
+   "description": "Prices of gold, silver, platinum and palladium bars and coins scraped every day from European dealers, with price per gram in euros, VAT treatment, shop and country.",
+   "url": "https://uyttenhovesimon.github.io/PMScanner/", "isAccessibleForFree": true,
+   "license": "https://github.com/UyttenhoveSimon/PMScanner/blob/main/LICENSE",
+   "keywords": ["gold price per gram", "silver price", "bullion dealers", "gold bars", "gold coins", "Krugerrand", "Maple Leaf"],
+   "creator": {"@type": "Person", "name": "Simon Uyttenhove"},
+   "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://uyttenhovesimon.github.io/PMScanner/api/prices.json"}]}
+]}
+</script>
 {{if .Scanning}}<meta http-equiv="refresh" content="20">{{end}}
 <style>
   :root {
@@ -68,6 +89,7 @@
   .err { color: var(--err); white-space: normal; }
   details { margin-top: 28px; color: var(--muted); }
   .empty { padding: 40px 0; color: var(--muted); }
+  .intro { margin: 12px 0 0; color: var(--muted); font-size: 14px; max-width: 72ch; }
 </style>
 </head>
 <body>
@@ -87,6 +109,9 @@
       <a href="https://github.com/UyttenhoveSimon/PMScanner">GitHub</a>
     </div>
   </header>
+  {{if .Scanned}}
+  <p class="intro">Gold, silver, platinum and palladium bars and coins from {{.Shops}} European bullion dealers in {{len .Countries}} countries, ranked from cheapest to dearest by price per gram, VAT included. Prices are read from the dealers' own pages every day; the cheapest offer of each type is highlighted.</p>
+  {{end}}
   {{if and .Scanned (not .IsLatest)}}
     <p class="old">You are looking at the scan of {{.Scanned}}. <a href="{{.LatestURL}}">Show the latest</a></p>
   {{end}}
@@ -163,6 +188,14 @@
       <h2>Exchange rates</h2>
       <p class="note">Prices are ranked in euros. Each price is converted at the exchange rate of the day of its scan, and the price per gram includes VAT as explained above. The Currency menu then converts all prices with the latest rates.</p>
       <p class="note">Rates are the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" target="_blank" rel="noopener">European Central Bank's daily euro reference rates</a>{{if .ECBCurrencies}} ({{range $i, $c := .ECBCurrencies}}{{if $i}}, {{end}}{{$c}}{{end}}){{end}}, published on working days around 16:00 CET.{{if .FallbackCurrencies}} For currencies the ECB does not publish ({{range $i, $c := .FallbackCurrencies}}{{if $i}}, {{end}}{{$c}}{{end}}), rates come from <a href="https://www.exchangerate-api.com/docs/free" target="_blank" rel="noopener">open.er-api.com</a>, updated daily.{{end}}</p>
+    </section>
+
+    <section id="about" class="taxes">
+      <h2>About PM Scanner</h2>
+      <p class="note"><strong>What is it?</strong> A free, open-source price comparison for physical precious metals: 1 kg gold bars; gold coins such as the Krugerrand, Maple Leaf, Vienna Philharmonic, Britannia, American Eagle, Kangaroo, Sovereign, 20 Mark, Vreneli and Napoleon; silver bars and Maple Leafs; platinum, palladium and copper. Each product links straight to the dealer's page.</p>
+      <p class="note"><strong>How are prices compared?</strong> Every price is converted to euros and divided by the product's weight, so a 1 oz coin, a 100 g bar and a 1 kg bar can be compared per gram. VAT is included as the buyer pays it, by country, as shown in the taxes table above.</p>
+      <p class="note"><strong>How often is it updated?</strong> A scan runs every day; past scans stay available from the Scan menu, and every scan's prices can be downloaded as <a href="{{.JSONURL}}">JSON</a>.</p>
+      <p class="note"><strong>Missing a dealer, or run one?</strong> The scraper and the list of shops are on <a href="https://github.com/UyttenhoveSimon/PMScanner">GitHub</a>; see <a href="https://github.com/UyttenhoveSimon/PMScanner#for-shop-owners">For shop owners</a> to add or remove a shop.</p>
     </section>
 
     {{if .Failed}}
